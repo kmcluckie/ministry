@@ -71,7 +71,8 @@
             />
           </UDropdownMenu>
         </div>
-        <div class="mt-3 pt-3 border-t border-[var(--ui-border-subtle)] flex items-center text-xs text-[var(--ui-text-muted)]">
+        <USeparator class="my-3" />
+        <div class="flex items-center text-xs text-[var(--ui-text-muted)]">
           <UIcon name="i-heroicons-calendar" class="h-3 w-3 mr-1" />
           Added {{ formatDate(person.created_at) }}
         </div>
@@ -186,7 +187,6 @@
 
 <script setup lang="ts">
 import { debounce } from 'lodash-es'
-import type { FormSubmitEvent } from '#ui/types'
 
 type Person = {
   id: string
