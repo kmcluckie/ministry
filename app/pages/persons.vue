@@ -15,6 +15,3 @@
   </div>
 </template>
 
-<script setup lang="ts">
-// This page will be implemented in T3
-</script>

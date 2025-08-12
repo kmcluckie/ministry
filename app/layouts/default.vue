@@ -1,7 +1,7 @@
 <template>
   <div v-if="user" class="min-h-screen bg-[var(--ui-bg)]">
     <!-- Navigation Header -->
-    <nav class="bg-white border-b border-[var(--ui-border)] px-4 py-3">
+    <nav class="border-b border-[var(--ui-border)] px-4 py-3">
       <div class="max-w-7xl mx-auto flex justify-between items-center">
         <div class="flex items-center space-x-8">
           <h1 class="text-xl font-semibold text-[var(--ui-text)]">
@@ -31,11 +31,11 @@
             {{ user.email }}
           </span>
           <UButton 
-            @click="logout"
             color="neutral"
             variant="ghost"
             size="sm"
             :loading="loading"
+            @click="logout"
           >
             Sign out
           </UButton>
@@ -56,31 +56,31 @@
 </template>
 
 <script setup lang="ts">
-const { client, user } = useSupabase()
-const router = useRouter()
+const { user } = useSupabase()
 const loading = ref(false)
+const toast = useToast()
 
 async function logout() {
   loading.value = true
+  const client = useSupabaseClient()
   
   try {
     const { error } = await client.auth.signOut()
     
     if (error) throw error
     
-    const toast = useToast()
     toast.add({
       title: 'Success',
       description: 'You have been signed out',
       color: 'success'
     })
     
-    await router.push('/login')
-  } catch (error: any) {
-    const toast = useToast()
+    await navigateTo('/login')
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to sign out'
     toast.add({
       title: 'Error',
-      description: error.message || 'Failed to sign out',
+      description: errorMessage,
       color: 'error'
     })
   } finally {

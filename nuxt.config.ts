@@ -9,17 +9,4 @@ export default defineNuxtConfig({
   ssr: false,
 
   compatibilityDate: '2025-07-16',
-
-  supabase: {
-    redirect: true,
-    redirectOptions: {
-      login: '/login',
-      callback: '/confirm',
-      exclude: [
-        '/register',
-        '/login',
-        '/reset-password'
-      ]
-    }
-  }
 })
