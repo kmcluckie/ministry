@@ -14,13 +14,13 @@
       </div>
       
       <UForm :schema="schema" :state="state" @submit="onSubmit" class="mt-8 space-y-4 flex flex-col">
-        <UFormGroup label="Email" name="email">
+        <UFormField label="Email" name="email">
           <UInput v-model="state.email" type="email" placeholder="Enter your email" class="w-full" />
-        </UFormGroup>
+        </UFormField>
 
-        <UFormGroup label="Password" name="password">
+        <UFormField label="Password" name="password">
           <UInput v-model="state.password" type="password" placeholder="Enter your password" class="w-full" />
-        </UFormGroup>
+        </UFormField>
 
         <UButton type="submit" block size="lg" :loading="loading">
           Sign in
