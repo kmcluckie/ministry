@@ -512,7 +512,7 @@ const getVisitActions = (visit: Visit) => [
   [{
     label: 'Edit',
     icon: 'i-heroicons-pencil',
-    click: () => {
+    onSelect: () => {
       editVisitForm.id = visit.id
       editVisitForm.visited_at = toInputDateTime(visit.visited_at)
       editVisitForm.notes = visit.notes || ''
@@ -522,7 +522,7 @@ const getVisitActions = (visit: Visit) => [
   [{
     label: 'Delete',
     icon: 'i-heroicons-trash',
-    click: () => handleDeleteVisit(visit.id)
+    onSelect: () => handleDeleteVisit(visit.id)
   }]
 ]
 </script>

@@ -2,7 +2,13 @@ import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import { z } from 'zod'
 
 const createVisitSchema = z.object({
-  visited_at: z.string().datetime(),
+  visited_at: z.string().transform((val) => {
+    // Handle datetime-local format (YYYY-MM-DDTHH:mm) by adding seconds and timezone
+    if (val.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/)) {
+      return val + ':00.000Z'
+    }
+    return val
+  }).pipe(z.string().datetime()),
   notes: z.string().max(2000, 'Notes must be less than 2000 characters').nullable().optional()
 })
 
@@ -57,7 +63,8 @@ export default defineEventHandler(async (event) => {
   const { data, error } = await client
     .from('visits')
     .insert({
-      ...result.data,
+      visited_at: result.data.visited_at,
+      notes: result.data.notes || null,
       person_id: personId,
       user_id: user.id
     })
