@@ -61,7 +61,7 @@
               {{ person.notes }}
             </p>
           </div>
-          <UDropdown :items="getPersonActions(person)">
+          <UDropdownMenu :items="getPersonActions(person)">
             <UButton
               color="neutral"
               variant="ghost"
@@ -69,7 +69,7 @@
               size="xs"
               @click.stop
             />
-          </UDropdown>
+          </UDropdownMenu>
         </div>
         <div class="mt-3 pt-3 border-t border-[var(--ui-border-subtle)] flex items-center text-xs text-[var(--ui-text-muted)]">
           <UIcon name="i-heroicons-calendar" class="h-3 w-3 mr-1" />
