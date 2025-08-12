@@ -3,22 +3,22 @@
     <!-- Navigation Header -->
     <nav class="border-b border-[var(--ui-border)] px-4 py-3">
       <div class="max-w-7xl mx-auto flex justify-between items-center">
-        <div class="flex items-center space-x-8">
-          <h1 class="text-xl font-semibold text-[var(--ui-text)]">
+        <div class="flex items-center space-x-2 sm:space-x-8">
+          <h1 class="hidden sm:block text-xl font-semibold text-[var(--ui-text)]">
             Ministry Tracker
           </h1>
           
-          <div class="flex space-x-4">
+          <div class="flex space-x-2 sm:space-x-4">
             <NuxtLink 
               to="/persons" 
-              class="text-[var(--ui-text-muted)] hover:text-[var(--ui-primary)] px-3 py-2 rounded-md text-sm font-medium"
+              class="text-[var(--ui-text-muted)] hover:text-[var(--ui-primary)] px-2 sm:px-3 py-2 rounded-md text-sm font-medium"
               active-class="text-[var(--ui-primary)] bg-[var(--ui-primary)]/10"
             >
               Persons
             </NuxtLink>
             <NuxtLink 
               to="/time" 
-              class="text-[var(--ui-text-muted)] hover:text-[var(--ui-primary)] px-3 py-2 rounded-md text-sm font-medium"
+              class="text-[var(--ui-text-muted)] hover:text-[var(--ui-primary)] px-2 sm:px-3 py-2 rounded-md text-sm font-medium"
               active-class="text-[var(--ui-primary)] bg-[var(--ui-primary)]/10"
             >
               Time
@@ -26,19 +26,15 @@
           </div>
         </div>
         
-        <div class="flex items-center space-x-4">
-          <span class="text-sm text-[var(--ui-text-muted)]">
-            {{ user.email }}
-          </span>
-          <UButton 
-            color="neutral"
-            variant="ghost"
-            size="sm"
-            :loading="loading"
-            @click="logout"
-          >
-            Sign out
-          </UButton>
+        <div class="flex items-center">
+          <UDropdownMenu :items="userMenuItems">
+            <UButton 
+              color="neutral"
+              variant="ghost"
+              icon="i-heroicons-user-circle"
+              size="lg"
+            />
+          </UDropdownMenu>
         </div>
       </div>
     </nav>
@@ -59,6 +55,19 @@
 const { user } = useSupabase()
 const loading = ref(false)
 const toast = useToast()
+
+const userMenuItems = computed(() => [
+  [{
+    label: user.value?.email || 'User',
+    icon: 'i-heroicons-envelope',
+    type: 'label'
+  }],
+  [{
+    label: 'Sign out',
+    icon: 'i-heroicons-arrow-right-on-rectangle',
+    onSelect: logout
+  }]
+])
 
 async function logout() {
   loading.value = true
