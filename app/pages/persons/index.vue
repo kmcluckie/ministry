@@ -240,12 +240,12 @@ const getPersonActions = (person: Person) => [
   [{
     label: 'View Details',
     icon: 'i-heroicons-eye',
-    click: () => navigateTo(`/persons/${person.id}`)
+    to: `/persons/${person.id}`
   }],
   [{
     label: 'Edit',
     icon: 'i-heroicons-pencil',
-    click: () => {
+    onSelect: () => {
       Object.assign(editingPerson, {
         id: person.id,
         name: person.name,
@@ -258,7 +258,7 @@ const getPersonActions = (person: Person) => [
   [{
     label: 'Delete',
     icon: 'i-heroicons-trash',
-    click: () => handleDeletePerson(person.id)
+    onSelect: () => handleDeletePerson(person.id)
   }]
 ]
 
