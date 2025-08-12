@@ -38,6 +38,10 @@
 import { z } from 'zod'
 import type { FormSubmitEvent } from '#ui/types'
 
+definePageMeta({
+  layout: false
+})
+
 const { client } = useSupabase()
 const router = useRouter()
 
