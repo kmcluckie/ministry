@@ -38,7 +38,7 @@ export default defineEventHandler(async (event) => {
   if (!result.success) {
     throw createError({
       statusCode: 400,
-      statusMessage: result.error.errors[0].message
+      statusMessage: result.error.errors[0]?.message || 'Validation error'
     })
   }
 
@@ -60,7 +60,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Create the visit
-  const { data, error } = await client
+  const { data, error } = await (client as any)
     .from('visits')
     .insert({
       visited_at: result.data.visited_at,

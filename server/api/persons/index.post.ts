@@ -24,13 +24,13 @@ export default defineEventHandler(async (event) => {
   if (!result.success) {
     throw createError({
       statusCode: 400,
-      statusMessage: result.error.errors[0].message
+      statusMessage: result.error.errors[0]?.message || 'Validation error'
     })
   }
 
   const client = await serverSupabaseClient(event)
   
-  const { data, error } = await client
+  const { data, error } = await (client as any)
     .from('persons')
     .insert({
       ...result.data,

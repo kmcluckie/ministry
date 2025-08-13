@@ -69,115 +69,18 @@
       </div>
     </div>
 
-    <UModal v-model:open="showAddModal">
-      <template #content>
-        <UCard>
-          <template #header>
-            <h3 class="text-lg font-semibold">Add New Person</h3>
-          </template>
+    <PersonAddModal
+      v-model:open="showAddModal"
+      :loading="isAdding"
+      @submit="handleAddPerson"
+    />
 
-          <UForm :state="newPerson" @submit="handleAddPerson" class="space-y-4">
-            <UFormField name="name" label="Name" required>
-              <UInput
-                v-model="newPerson.name"
-                placeholder="Enter person's name"
-                class="w-full"
-              />
-            </UFormField>
-
-            <UFormField name="address" label="Address">
-              <UTextarea
-                v-model="newPerson.address"
-                placeholder="Enter address (optional)"
-                :rows="2"
-                class="w-full"
-              />
-            </UFormField>
-
-            <UFormField name="notes" label="Notes">
-              <UTextarea
-                v-model="newPerson.notes"
-                placeholder="Add any notes (optional)"
-                :rows="3"
-                maxlength="2000"
-                class="w-full"
-              />
-            </UFormField>
-
-            <div class="flex justify-end gap-3">
-              <UButton
-                color="neutral"
-                variant="ghost"
-                @click="showAddModal = false"
-              >
-                Cancel
-              </UButton>
-              <UButton
-                type="submit"
-                :loading="isAdding"
-              >
-                Add Person
-              </UButton>
-            </div>
-          </UForm>
-        </UCard>
-      </template>
-    </UModal>
-
-    <UModal v-model:open="showEditModal">
-      <template #content>
-        <UCard>
-          <template #header>
-            <h3 class="text-lg font-semibold">Edit Person</h3>
-          </template>
-
-          <UForm :state="editingPerson" @submit="handleEditPerson" class="space-y-4">
-            <UFormField name="name" label="Name" required>
-              <UInput
-                v-model="editingPerson.name"
-                placeholder="Enter person's name"
-                class="w-full"
-              />
-            </UFormField>
-
-            <UFormField name="address" label="Address">
-              <UTextarea
-                v-model="editingPerson.address"
-                placeholder="Enter address (optional)"
-                :rows="2"
-                class="w-full"
-              />
-            </UFormField>
-
-            <UFormField name="notes" label="Notes">
-              <UTextarea
-                v-model="editingPerson.notes"
-                placeholder="Add any notes (optional)"
-                :rows="3"
-                maxlength="2000"
-                class="w-full"
-              />
-            </UFormField>
-
-            <div class="flex justify-end gap-3">
-              <UButton
-                color="neutral"
-                variant="ghost"
-                @click="showEditModal = false"
-              >
-                Cancel
-              </UButton>
-              <UButton
-                type="submit"
-                :loading="isEditing"
-              >
-                Save Changes
-              </UButton>
-            </div>
-          </UForm>
-        </UCard>
-      </template>
-    </UModal>
+    <PersonEditModal
+      v-model:open="showEditModal"
+      :person="currentEditingPerson"
+      :loading="isEditing"
+      @submit="handleEditPerson"
+    />
   </div>
 </template>
 
@@ -200,18 +103,7 @@ const showEditModal = ref(false)
 const isAdding = ref(false)
 const isEditing = ref(false)
 
-const newPerson = reactive({
-  name: '',
-  address: '',
-  notes: ''
-})
-
-const editingPerson = reactive({
-  id: '',
-  name: '',
-  address: '',
-  notes: ''
-})
+const currentEditingPerson = ref<Person | null>(null)
 
 const { data: persons, pending, error, refresh } = await useFetch<Person[]>('/api/persons', {
   query: {
@@ -242,12 +134,7 @@ const getPersonActions = (person: Person) => [
     label: 'Edit',
     icon: 'i-heroicons-pencil',
     onSelect: () => {
-      Object.assign(editingPerson, {
-        id: person.id,
-        name: person.name,
-        address: person.address || '',
-        notes: person.notes || ''
-      })
+      currentEditingPerson.value = person
       showEditModal.value = true
     }
   }],
@@ -258,21 +145,15 @@ const getPersonActions = (person: Person) => [
   }]
 ]
 
-async function handleAddPerson() {
+async function handleAddPerson(data: { name: string; address: string; notes: string }) {
   isAdding.value = true
   try {
     await $fetch<any>('/api/persons', {
       method: 'POST',
-      body: newPerson
+      body: data
     })
     
     showAddModal.value = false
-    Object.assign(newPerson, {
-      name: '',
-      address: '',
-      notes: ''
-    })
-    
     await refresh()
     
     const toast = useToast()
@@ -292,19 +173,18 @@ async function handleAddPerson() {
   }
 }
 
-async function handleEditPerson() {
+async function handleEditPerson(data: { name: string; address: string; notes: string }) {
+  if (!currentEditingPerson.value) return
+  
   isEditing.value = true
   try {
-    await $fetch<any>(`/api/persons/${editingPerson.id}`, {
+    await $fetch<any>(`/api/persons/${currentEditingPerson.value.id}`, {
       method: 'PUT',
-      body: {
-        name: editingPerson.name,
-        address: editingPerson.address,
-        notes: editingPerson.notes
-      }
+      body: data
     })
     
     showEditModal.value = false
+    currentEditingPerson.value = null
     await refresh()
     
     const toast = useToast()

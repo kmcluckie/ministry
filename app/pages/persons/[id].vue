@@ -133,60 +133,12 @@
     </div>
 
     <!-- Edit Person Modal -->
-    <UModal v-model:open="showEditModal">
-      <template #content>
-        <UCard>
-          <template #header>
-            <h3 class="text-lg font-semibold">Edit Person</h3>
-          </template>
-
-          <UForm :state="editForm" @submit="handleEdit" class="space-y-4">
-            <UFormField name="name" label="Name" required>
-              <UInput
-                v-model="editForm.name"
-                placeholder="Enter person's name"
-                class="w-full"
-              />
-            </UFormField>
-
-            <UFormField name="address" label="Address">
-              <UTextarea
-                v-model="editForm.address"
-                placeholder="Enter address (optional)"
-                :rows="2"
-                class="w-full"
-              />
-            </UFormField>
-
-            <UFormField name="notes" label="Notes">
-              <UTextarea
-                v-model="editForm.notes"
-                placeholder="Add any notes (optional)"
-                :rows="3"
-                maxlength="2000"
-                class="w-full"
-              />
-            </UFormField>
-
-            <div class="flex justify-end gap-3">
-              <UButton
-                color="neutral"
-                variant="ghost"
-                @click="showEditModal = false"
-              >
-                Cancel
-              </UButton>
-              <UButton
-                type="submit"
-                :loading="isEditing"
-              >
-                Save Changes
-              </UButton>
-            </div>
-          </UForm>
-        </UCard>
-      </template>
-    </UModal>
+    <PersonEditModal
+      v-model:open="showEditModal"
+      :person="person"
+      :loading="isEditing"
+      @submit="handleEdit"
+    />
 
     <!-- Add Visit Modal -->
     <UModal v-model:open="showAddVisitModal">
@@ -320,12 +272,6 @@ const isEditing = ref(false)
 const isAddingVisit = ref(false)
 const isEditingVisit = ref(false)
 
-// Forms
-const editForm = reactive({
-  name: '',
-  address: '',
-  notes: ''
-})
 
 const visitForm = reactive({
   visited_at: new Date().toISOString().slice(0, 16),
@@ -344,14 +290,6 @@ const { data: person, pending, error, refresh: refreshPerson } = await useFetch<
 // Fetch visits
 const { data: visits, refresh: refreshVisits } = await useFetch<Visit[]>(`/api/persons/${personId}/visits`)
 
-// Watch person data to update edit form
-watch(person, (newPerson) => {
-  if (newPerson) {
-    editForm.name = newPerson.name
-    editForm.address = newPerson.address || ''
-    editForm.notes = newPerson.notes || ''
-  }
-})
 
 // Format functions
 const formatDate = (dateString: string) => {
@@ -379,12 +317,12 @@ const toInputDateTime = (dateString: string) => {
 }
 
 // Person actions
-async function handleEdit() {
+async function handleEdit(data: { name: string; address: string; notes: string }) {
   isEditing.value = true
   try {
     await $fetch<any>(`/api/persons/${personId}`, {
       method: 'PUT',
-      body: editForm
+      body: data
     })
     
     showEditModal.value = false
