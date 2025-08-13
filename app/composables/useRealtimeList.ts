@@ -69,61 +69,20 @@ export function useRealtimeList<T extends TableName>(
     }
   }, { immediate: true })
 
-  // Check if item matches current search
-  const matchesSearch = (item: Item): boolean => {
-    if (!searchQuery.value || !options.searchField) return true
-    
-    const searchField = options.searchField as keyof Item
-    const fieldValue = item[searchField]
-    
-    if (typeof fieldValue === 'string') {
-      return fieldValue.toLowerCase().includes(searchQuery.value.toLowerCase())
-    }
-    
-    return String(fieldValue).toLowerCase().includes(searchQuery.value.toLowerCase())
-  }
+
 
   // Realtime subscription
   const { state: realtimeState, reconnect } = useRealtimeSubscription({
     table: options.table,
     filter: options.filter,
-    onInsert: (payload) => {
-      const newItem = payload.new as Item
-      const transformedItem = options.transform ? options.transform(newItem) : newItem
-      
-      // Only add if not already in list and matches search
-      if (!items.value.find(item => item.id === newItem.id)) {
-        if (matchesSearch(transformedItem)) {
-          items.value.push(transformedItem)
-          sortItems()
-        }
-      }
+    onInsert: () => {
+      refresh()
     },
-    onUpdate: (payload) => {
-      const updatedItem = payload.new as Item
-      const transformedItem = options.transform ? options.transform(updatedItem) : updatedItem
-      const index = items.value.findIndex(item => item.id === updatedItem.id)
-      
-      if (index !== -1) {
-        if (matchesSearch(transformedItem)) {
-          items.value[index] = transformedItem
-          sortItems()
-        } else {
-          // Remove if no longer matches search
-          items.value.splice(index, 1)
-        }
-      } else if (matchesSearch(transformedItem)) {
-        // Add if now matches search and wasn't there before
-        items.value.push(transformedItem)
-        sortItems()
-      }
+    onUpdate: () => {
+      refresh()
     },
-    onDelete: (payload) => {
-      const deletedItem = payload.old as Item
-      const index = items.value.findIndex(item => item.id === deletedItem.id)
-      if (index !== -1) {
-        items.value.splice(index, 1)
-      }
+    onDelete: () => {
+      refresh()
     },
     onError: (error) => {
       console.error(`Realtime error for ${options.table}:`, error)
