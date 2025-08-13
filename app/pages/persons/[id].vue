@@ -145,6 +145,7 @@
               <UInput
                 v-model="editForm.name"
                 placeholder="Enter person's name"
+                class="w-full"
               />
             </UFormField>
 
@@ -153,6 +154,7 @@
                 v-model="editForm.address"
                 placeholder="Enter address (optional)"
                 :rows="2"
+                class="w-full"
               />
             </UFormField>
 
@@ -162,6 +164,7 @@
                 placeholder="Add any notes (optional)"
                 :rows="3"
                 maxlength="2000"
+                class="w-full"
               />
             </UFormField>
 
@@ -199,6 +202,7 @@
                 v-model="visitForm.visited_at"
                 type="datetime-local"
                 required
+                class="w-full"
               />
             </UFormField>
 
@@ -208,6 +212,7 @@
                 placeholder="Add any notes about the visit (optional)"
                 :rows="3"
                 maxlength="2000"
+                class="w-full"
               />
             </UFormField>
 
@@ -245,6 +250,7 @@
                 v-model="editVisitForm.visited_at"
                 type="datetime-local"
                 required
+                class="w-full"
               />
             </UFormField>
 
@@ -254,6 +260,7 @@
                 placeholder="Add any notes about the visit (optional)"
                 :rows="3"
                 maxlength="2000"
+                class="w-full"
               />
             </UFormField>
 

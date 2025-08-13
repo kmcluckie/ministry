@@ -81,6 +81,7 @@
               <UInput
                 v-model="newPerson.name"
                 placeholder="Enter person's name"
+                class="w-full"
               />
             </UFormField>
 
@@ -89,6 +90,7 @@
                 v-model="newPerson.address"
                 placeholder="Enter address (optional)"
                 :rows="2"
+                class="w-full"
               />
             </UFormField>
 
@@ -98,6 +100,7 @@
                 placeholder="Add any notes (optional)"
                 :rows="3"
                 maxlength="2000"
+                class="w-full"
               />
             </UFormField>
 
@@ -133,6 +136,7 @@
               <UInput
                 v-model="editingPerson.name"
                 placeholder="Enter person's name"
+                class="w-full"
               />
             </UFormField>
 
@@ -141,6 +145,7 @@
                 v-model="editingPerson.address"
                 placeholder="Enter address (optional)"
                 :rows="2"
+                class="w-full"
               />
             </UFormField>
 
@@ -150,6 +155,7 @@
                 placeholder="Add any notes (optional)"
                 :rows="3"
                 maxlength="2000"
+                class="w-full"
               />
             </UFormField>
 
