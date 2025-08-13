@@ -58,3 +58,8 @@ Follow the official Nuxt.js and Vue.js documentation for up-to-date best practic
 - Use Nuxt's built-in testing utilities.
 - Test client-side components and interactions.
 - Test edge cases and error handling.
+
+# Tools
+- Use context7 MCP for up-to-date documentation for all libraries and frameworks
+- User serena MCP for semantic search of the codebase
+- Use supabase MCP for database schema and queries
