@@ -14,7 +14,7 @@
     </div>
 
     <!-- Person Not Found -->
-    <div v-else-if="!localPerson" class="text-center py-8">
+    <div v-else-if="!person" class="text-center py-8">
       <UIcon name="i-heroicons-user-circle" class="h-12 w-12 text-[var(--ui-text-muted)] mx-auto mb-3" />
       <p class="text-[var(--ui-text-muted)]">Person not found</p>
       <UButton class="mt-3" color="neutral" variant="ghost" @click="navigateTo('/persons')">
@@ -38,9 +38,9 @@
               Back
             </UButton>
           </div>
-          <h1 class="text-2xl font-bold text-[var(--ui-text)]">{{ localPerson.name }}</h1>
+          <h1 class="text-2xl font-bold text-[var(--ui-text)]">{{ person.name }}</h1>
           <p class="mt-1 text-sm text-[var(--ui-text-muted)]">
-            Added {{ formatDate(localPerson.created_at) }}
+            Added {{ formatDate(person.created_at) }}
           </p>
         </div>
         <div class="flex gap-2">
@@ -72,17 +72,17 @@
         <div class="space-y-4">
           <div>
             <label class="text-sm font-medium text-[var(--ui-text-muted)]">Name</label>
-            <p class="mt-1 text-[var(--ui-text)]">{{ localPerson.name }}</p>
+            <p class="mt-1 text-[var(--ui-text)]">{{ person.name }}</p>
           </div>
           
-          <div v-if="localPerson.address">
+          <div v-if="person.address">
             <label class="text-sm font-medium text-[var(--ui-text-muted)]">Address</label>
-            <p class="mt-1 text-[var(--ui-text)] whitespace-pre-wrap">{{ localPerson.address }}</p>
+            <p class="mt-1 text-[var(--ui-text)] whitespace-pre-wrap">{{ person.address }}</p>
           </div>
           
-          <div v-if="localPerson.notes">
+          <div v-if="person.notes">
             <label class="text-sm font-medium text-[var(--ui-text-muted)]">Notes</label>
-            <p class="mt-1 text-[var(--ui-text)] whitespace-pre-wrap">{{ localPerson.notes }}</p>
+            <p class="mt-1 text-[var(--ui-text)] whitespace-pre-wrap">{{ person.notes }}</p>
           </div>
         </div>
       </UCard>
@@ -101,8 +101,8 @@
         </div>
 
         <!-- Visits List -->
-        <div v-if="localVisits && localVisits.length > 0" class="space-y-3">
-          <UCard v-for="visit in localVisits" :key="visit.id">
+        <div v-if="visits && visits.length > 0" class="space-y-3">
+          <UCard v-for="visit in visits" :key="visit.id">
             <div class="flex justify-between items-start">
               <div class="flex-1">
                 <p class="font-medium text-[var(--ui-text)]">
@@ -135,7 +135,7 @@
     <!-- Edit Person Modal -->
     <PersonEditModal
       v-model:open="showEditModal"
-      :person="localPerson"
+      :person="person"
       :loading="isEditing"
       @submit="handleEdit"
     />
@@ -290,89 +290,34 @@ const editVisitForm = reactive({
   notes: ''
 })
 
-// Fetch person data
-const { data: person, pending, error } = await useFetch<Person>(`/api/persons/${personId}`)
-
-// Fetch visits
-const { data: visits } = await useFetch<Visit[]>(`/api/persons/${personId}/visits`)
-
-// Create reactive local copies for realtime updates
-const localPerson = ref<Person | null>(person.value)
-const localVisits = ref<Visit[]>(visits.value || [])
-
-// Watch for changes from useFetch and update local copies
-watch(person, (newPerson) => {
-  if (newPerson) {
-    localPerson.value = { ...newPerson }
-  }
-}, { immediate: true })
-
-watch(visits, (newVisits) => {
-  if (newVisits) {
-    localVisits.value = [...newVisits]
-  }
-}, { immediate: true })
-
-// Set up realtime subscription for this person
-const { state: personRealtimeState, reconnect: reconnectPerson } = useRealtimeSubscription({
+// Use realtime item for person data
+const {
+  item: person,
+  pending,
+  error,
+  realtimeState: personRealtimeState,
+  reconnect: reconnectPerson
+} = useRealtimeItem({
   table: 'persons',
-  filter: `id=eq.${personId}`,
-  onUpdate: (payload) => {
-    const updatedPerson = payload.new as Person
-    if (localPerson.value && updatedPerson.id === localPerson.value.id) {
-      localPerson.value = updatedPerson
-    }
-  },
-  onDelete: (payload) => {
-    const deletedPerson = payload.old as Person
-    if (localPerson.value && deletedPerson.id === localPerson.value.id) {
-      // Person was deleted, navigate back to list
-      navigateTo('/persons')
-    }
-  },
-  onError: (error) => {
-    console.error('Person realtime subscription error:', error)
-  }
+  id: personId,
+  apiEndpoint: `/api/persons/${personId}`,
+  onDeleted: () => navigateTo('/persons')
 })
 
-// Set up realtime subscription for visits of this person
-const { state: visitsRealtimeState, reconnect: reconnectVisits } = useRealtimeSubscription({
+// Use realtime list for visits
+const {
+  items: visits,
+  realtimeState: visitsRealtimeState,
+  reconnect: reconnectVisits
+} = useRealtimeList({
   table: 'visits',
+  apiEndpoint: `/api/persons/${personId}/visits`,
   filter: `person_id=eq.${personId}`,
-  onInsert: (payload) => {
-    const newVisit = payload.new as Visit
-    if (newVisit.person_id === personId) {
-      // Add to list and sort by visited_at (newest first)
-      localVisits.value = [...localVisits.value, newVisit]
-        .sort((a, b) => new Date(b.visited_at).getTime() - new Date(a.visited_at).getTime())
-    }
-  },
-  onUpdate: (payload) => {
-    const updatedVisit = payload.new as Visit
-    const index = localVisits.value.findIndex(v => v.id === updatedVisit.id)
-    if (index !== -1) {
-      localVisits.value[index] = updatedVisit
-      // Re-sort the list
-      localVisits.value = [...localVisits.value]
-        .sort((a, b) => new Date(b.visited_at).getTime() - new Date(a.visited_at).getTime())
-    }
-  },
-  onDelete: (payload) => {
-    const deletedVisit = payload.old as Visit
-    localVisits.value = localVisits.value.filter(v => v.id !== deletedVisit.id)
-  },
-  onError: (error) => {
-    console.error('Visits realtime subscription error:', error)
-  }
+  sortBy: 'visited_at',
+  sortOrder: 'desc'
 })
 
-// Combined reconnect function for both subscriptions
-const reconnectRealtime = () => {
-  reconnectPerson()
-  reconnectVisits()
-}
-
-// Combined realtime state (show error if either has issues)
+// Combined realtime state and reconnect
 const combinedRealtimeState = computed(() => ({
   isConnected: personRealtimeState.isConnected && visitsRealtimeState.isConnected,
   isSubscribed: personRealtimeState.isSubscribed && visitsRealtimeState.isSubscribed,
@@ -381,6 +326,11 @@ const combinedRealtimeState = computed(() => ({
     ? 'ERROR' as const
     : personRealtimeState.connectionStatus
 }))
+
+const reconnectRealtime = () => {
+  reconnectPerson()
+  reconnectVisits()
+}
 
 
 // Format functions
@@ -410,21 +360,9 @@ const toInputDateTime = (dateString: string) => {
 
 // Person actions
 async function handleEdit(data: { name: string; address: string; notes: string }) {
-  if (!localPerson.value) return
+  if (!person.value) return
   
   isEditing.value = true
-  const originalPerson = { ...localPerson.value }
-  
-  // Optimistic update: Update person immediately
-  localPerson.value = {
-    ...localPerson.value,
-    name: data.name,
-    address: data.address || null,
-    notes: data.notes || null,
-    updated_at: new Date().toISOString()
-  }
-  
-  showEditModal.value = false
   
   try {
     await $fetch(`/api/persons/${personId}`, {
@@ -432,15 +370,12 @@ async function handleEdit(data: { name: string; address: string; notes: string }
       body: data
     })
     
+    showEditModal.value = false
     toast.add({
       title: 'Success',
       description: 'Person updated successfully'
     })
-    // Note: Realtime will confirm the update with server data
   } catch {
-    // Revert optimistic update on error
-    localPerson.value = originalPerson
-    
     toast.add({
       title: 'Error',
       description: 'Failed to update person',
@@ -480,41 +415,21 @@ async function handleDelete() {
 async function handleAddVisit() {
   isAddingVisit.value = true
   
-  // Optimistic update: Add temporary visit to the list immediately
-  const tempId = `temp-${Date.now()}`
-  const tempVisit: Visit = {
-    id: tempId,
-    person_id: personId,
-    user_id: '', // Will be set by server
-    visited_at: visitForm.visited_at,
-    notes: visitForm.notes || null,
-    created_at: new Date().toISOString()
-  }
-  
-  // Add to local list and sort by visited_at (newest first)
-  localVisits.value = [...localVisits.value, tempVisit]
-    .sort((a, b) => new Date(b.visited_at).getTime() - new Date(a.visited_at).getTime())
-  
-  showAddVisitModal.value = false
-  const originalForm = { ...visitForm }
-  visitForm.visited_at = new Date().toISOString().slice(0, 16)
-  visitForm.notes = ''
-  
   try {
     await $fetch(`/api/persons/${personId}/visits`, {
       method: 'POST',
-      body: originalForm
+      body: visitForm
     })
+    
+    showAddVisitModal.value = false
+    visitForm.visited_at = new Date().toISOString().slice(0, 16)
+    visitForm.notes = ''
     
     toast.add({
       title: 'Success',
       description: 'Visit added successfully'
     })
-    // Note: Realtime will replace the temp visit with the real one from server
   } catch {
-    // Revert optimistic update on error
-    localVisits.value = localVisits.value.filter(v => v.id !== tempId)
-    
     toast.add({
       title: 'Error',
       description: 'Failed to add visit',
@@ -528,24 +443,6 @@ async function handleAddVisit() {
 async function handleEditVisit() {
   isEditingVisit.value = true
   
-  // Find the visit to update
-  const index = localVisits.value.findIndex(v => v.id === editVisitForm.id)
-  const originalVisit = index !== -1 ? { ...localVisits.value[index] } : null
-  
-  if (index !== -1) {
-    // Optimistic update: Update visit immediately
-    localVisits.value[index] = {
-      ...localVisits.value[index],
-      visited_at: editVisitForm.visited_at,
-      notes: editVisitForm.notes || null
-    }
-    // Re-sort the list
-    localVisits.value = [...localVisits.value]
-      .sort((a, b) => new Date(b.visited_at).getTime() - new Date(a.visited_at).getTime())
-  }
-  
-  showEditVisitModal.value = false
-  
   try {
     await $fetch(`/api/visits/${editVisitForm.id}`, {
       method: 'PUT',
@@ -555,19 +452,12 @@ async function handleEditVisit() {
       }
     })
     
+    showEditVisitModal.value = false
     toast.add({
       title: 'Success',
       description: 'Visit updated successfully'
     })
-    // Note: Realtime will confirm the update with server data
   } catch {
-    // Revert optimistic update on error
-    if (index !== -1 && originalVisit) {
-      localVisits.value[index] = originalVisit
-      localVisits.value = [...localVisits.value]
-        .sort((a, b) => new Date(b.visited_at).getTime() - new Date(a.visited_at).getTime())
-    }
-    
     toast.add({
       title: 'Error',
       description: 'Failed to update visit',
@@ -583,13 +473,6 @@ async function handleDeleteVisit(id: string) {
   
   if (!confirmed) return
   
-  // Find the visit to delete for potential restoration
-  const visitToDelete = localVisits.value.find(v => v.id === id)
-  if (!visitToDelete) return
-  
-  // Optimistic update: Remove visit from list immediately
-  localVisits.value = localVisits.value.filter(v => v.id !== id)
-  
   try {
     await $fetch(`/api/visits/${id}`, {
       method: 'DELETE'
@@ -599,12 +482,7 @@ async function handleDeleteVisit(id: string) {
       title: 'Success',
       description: 'Visit deleted successfully'
     })
-    // Note: Realtime will confirm the deletion
   } catch {
-    // Revert optimistic update on error
-    localVisits.value = [...localVisits.value, visitToDelete]
-      .sort((a, b) => new Date(b.visited_at).getTime() - new Date(a.visited_at).getTime())
-    
     toast.add({
       title: 'Error',
       description: 'Failed to delete visit',

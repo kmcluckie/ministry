@@ -1,4 +1,4 @@
-import type { Database } from '~/types/database.types'
+import type { Database } from '../../types/database.types'
 import type { RealtimeChannel, RealtimePostgresChangesPayload } from '@supabase/supabase-js'
 
 type TableName = keyof Database['public']['Tables']
@@ -46,7 +46,7 @@ export function useRealtimeSubscription<T extends TableName>(
     state.error = null
 
     // Create unique channel name
-    const channelName = `${options.table}-${Date.now()}-${Math.random().toString(36).substring(7)}`
+    const channelName = `${String(options.table)}-${Date.now()}-${Math.random().toString(36).substring(7)}`
     
     channel = client.channel(channelName)
 
