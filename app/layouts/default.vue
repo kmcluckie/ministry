@@ -33,6 +33,7 @@
               variant="ghost"
               icon="i-heroicons-user-circle"
               size="lg"
+              class="text-[var(--ui-text-muted)]"
             />
           </UDropdownMenu>
         </div>

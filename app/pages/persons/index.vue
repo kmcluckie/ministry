@@ -1,29 +1,19 @@
 <template>
-  <div class="max-w-7xl mx-auto py-6 px-4">
-    <div class="mb-6 flex justify-between items-center">
-      <div>
-        <h1 class="text-2xl font-bold text-[var(--ui-text)]">Persons</h1>
-        <p class="mt-1 text-sm text-[var(--ui-text-muted)]">
-          Manage your ministry visits and contacts
-        </p>
-      </div>
-      <UButton 
-        icon="i-heroicons-plus" 
-        size="sm"
-        @click="showAddModal = true"
-      >
-        Add Person
-      </UButton>
-    </div>
-
-    <div class="mb-6">
+  <div class="max-w-7xl mx-auto p-4">
+    <div class="mb-4 flex gap-3 items-center">
       <UInput
         v-model="searchQuery"
         icon="i-heroicons-magnifying-glass"
         placeholder="Search persons..."
-        size="lg"
+        class="flex-1"
         @input="debouncedSearch"
       />
+      <UButton 
+        icon="i-heroicons-plus" 
+        @click="showAddModal = true"
+      >
+        Add Person
+      </UButton>
     </div>
     
     <div v-if="pending" class="flex justify-center py-8">
