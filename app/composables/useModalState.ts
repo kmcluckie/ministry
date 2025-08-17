@@ -3,9 +3,50 @@ export interface ModalConfig<T extends string = string> {
   paramKeys?: readonly string[]
 }
 
-export function useModalState<T extends string>(config: ModalConfig<T>) {
+export interface ModalDefinition<T extends string = string> {
+  key: T
+  params?: string[]
+}
+
+// Helper function to convert kebab-case to PascalCase
+function toPascalCase(str: string): string {
+  return str
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join('')
+}
+
+// Overloaded function signatures
+export function useModalState<T extends string>(modals: ModalDefinition<T>[]): {
+  modalType: Readonly<ComputedRef<T | null>>
+  closeModal: (paramsToRemove?: string[]) => void
+} & Record<string, any>
+
+export function useModalState<T extends string>(config: ModalConfig<T>): {
+  modalType: Readonly<ComputedRef<T | null>>
+  getParam: (key: string) => ComputedRef<string | undefined>
+  isModalOpen: (type: T) => ComputedRef<boolean>
+  openModal: (type: T, params?: Record<string, string>) => void
+  closeModal: (paramsToRemove?: string[]) => void
+}
+
+// Implementation
+export function useModalState<T extends string>(
+  configOrModals: ModalConfig<T> | ModalDefinition<T>[]
+) {
   const route = useRoute()
   const router = useRouter()
+
+  // Determine if using simple or advanced interface
+  const isSimpleInterface = Array.isArray(configOrModals)
+  
+  // Extract config from either interface
+  const config: ModalConfig<T> = isSimpleInterface
+    ? {
+        allowedModals: configOrModals.map(m => m.key) as readonly T[],
+        paramKeys: configOrModals.flatMap(m => m.params || []) as readonly string[]
+      }
+    : configOrModals
 
   // Current modal state from URL
   const modalType = computed<T | null>(() => {
@@ -42,11 +83,48 @@ export function useModalState<T extends string>(config: ModalConfig<T>) {
     router.push({ query: cleanQuery })
   }
 
-  return {
-    modalType: readonly(modalType),
-    getParam,
-    isModalOpen,
-    openModal,
-    closeModal
+  // Return appropriate interface based on input
+  if (isSimpleInterface) {
+    const modals = configOrModals as ModalDefinition<T>[]
+    
+    // Create modal state object with computed properties
+    const modalStates = Object.fromEntries(
+      modals.map(modal => [
+        `show${toPascalCase(modal.key)}Modal`,
+        computed(() => modalType.value === modal.key)
+      ])
+    )
+
+    // Create parameter getters
+    const params = Object.fromEntries(
+      (config.paramKeys || []).map(key => [key, getParam(key)])
+    )
+
+    // Create open functions
+    const openFunctions = Object.fromEntries(
+      modals.map(modal => [
+        `open${toPascalCase(modal.key)}Modal`,
+        modal.params && modal.params.length > 0
+          ? (paramValues: Record<string, string>) => openModal(modal.key, paramValues)
+          : () => openModal(modal.key)
+      ])
+    )
+
+    return {
+      modalType: readonly(modalType),
+      closeModal,
+      ...modalStates,
+      ...params,
+      ...openFunctions
+    }
+  } else {
+    // Return advanced interface
+    return {
+      modalType: readonly(modalType),
+      getParam,
+      isModalOpen,
+      openModal,
+      closeModal
+    }
   }
 }

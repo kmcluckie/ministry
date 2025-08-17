@@ -192,24 +192,15 @@ const route = useRoute()
 const toast = useToast()
 const personId = route.params.id as string
 
-// Modal state management
-const modalConfig = {
-  allowedModals: ['edit-person', 'add-visit', 'edit-visit'] as const,
-  paramKeys: ['visitId'] as const
-}
-
-const { getParam, isModalOpen, openModal, closeModal } = useModalState(modalConfig)
-
-// Specific modal state
-const showEditPersonModal = isModalOpen('edit-person')
-const showAddVisitModal = isModalOpen('add-visit')
-const showEditVisitModal = isModalOpen('edit-visit')
-const visitId = getParam('visitId')
-
-// Convenience functions
-const openEditPersonModal = () => openModal('edit-person')
-const openAddVisitModal = () => openModal('add-visit')
-const openEditVisitModal = (visitId: string) => openModal('edit-visit', { visitId })
+// Modal state management (simplified interface)
+const {
+  showEditPersonModal, showAddVisitModal, showEditVisitModal, visitId, closeModal,
+  openEditPersonModal, openAddVisitModal, openEditVisitModal
+} = useModalState([
+  { key: 'edit-person' },
+  { key: 'add-visit' },
+  { key: 'edit-visit', params: ['visitId'] }
+])
 
 // Selected visit computed from URL visitId
 const selectedVisit = computed(() => {
@@ -427,7 +418,7 @@ const getVisitActions = (visit: Visit) => [
   [{
     label: 'Edit',
     icon: 'i-heroicons-pencil',
-    onSelect: () => openEditVisitModal(visit.id)
+    onSelect: () => openEditVisitModal({ visitId: visit.id })
   }],
   [{
     label: 'Delete',

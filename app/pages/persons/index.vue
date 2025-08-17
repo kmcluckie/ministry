@@ -70,14 +70,14 @@
     </div>
 
     <PersonAddModal
-      :open="showAddModal"
+      :open="showAddPersonModal"
       :loading="isAdding"
       @submit="handleAddPerson"
       @close="closeModal"
     />
 
     <PersonEditModal
-      :open="showEditModal"
+      :open="showEditPersonModal"
       :person="currentEditingPerson"
       :loading="isEditing"
       @submit="handleEditPerson"
@@ -106,18 +106,14 @@ type Person = {
   visitCount: number
 }
 
-// Modal state management
-const modalConfig = {
-  allowedModals: ['add-person', 'edit-person'] as const,
-  paramKeys: ['personId'] as const
-}
-
-const { getParam, isModalOpen, openModal, closeModal } = useModalState(modalConfig)
-
-// Specific modal state
-const showAddModal = isModalOpen('add-person')
-const showEditModal = isModalOpen('edit-person')
-const personId = getParam('personId')
+// Modal state management (simplified interface)
+const {
+  showAddPersonModal, showEditPersonModal, personId, closeModal,
+  openAddPersonModal, openEditPersonModal
+} = useModalState([
+  { key: 'add-person' },
+  { key: 'edit-person', params: ['personId'] }
+])
 
 // Loading states
 const isAdding = ref(false)
@@ -128,10 +124,6 @@ const currentEditingPerson = computed(() => {
   if (!personId.value || !persons.value) return null
   return persons.value.find(person => person.id === personId.value) || null
 })
-
-// Convenience functions
-const openAddPersonModal = () => openModal('add-person')
-const openEditPersonModal = (personId: string) => openModal('edit-person', { personId })
 
 // Use the generic realtime list composable
 const {
@@ -173,7 +165,7 @@ const getPersonActions = (person: Person) => [
   [{
     label: 'Edit',
     icon: 'i-heroicons-pencil',
-    onSelect: () => openEditPersonModal(person.id)
+    onSelect: () => openEditPersonModal({ personId: person.id })
   }],
   [{
     label: 'Delete',
