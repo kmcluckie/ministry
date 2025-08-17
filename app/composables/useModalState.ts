@@ -30,13 +30,16 @@ export function useModalState<T extends string>(config: ModalConfig<T>) {
 
   const closeModal = (paramsToRemove?: string[]) => {
     const query = { ...route.query }
-    delete query.modal
     
-    // Remove specified params or default modal-related params
-    const keysToRemove = paramsToRemove || config.paramKeys || []
-    keysToRemove.forEach(key => delete query[key])
+    // Remove modal and specified params
+    const keysToRemove = ['modal', ...(paramsToRemove || config.paramKeys || [])]
     
-    router.push({ query })
+    // Create new query object without the keys to remove
+    const cleanQuery = Object.fromEntries(
+      Object.entries(query).filter(([key]) => !keysToRemove.includes(key))
+    )
+    
+    router.push({ query: cleanQuery })
   }
 
   return {

@@ -10,7 +10,7 @@
       />
       <UButton 
         icon="i-heroicons-plus" 
-        @click="showAddModal = true"
+        @click="openAddPersonModal"
       >
         Add Person
       </UButton>
@@ -70,16 +70,18 @@
     </div>
 
     <PersonAddModal
-      v-model:open="showAddModal"
+      :open="showAddModal"
       :loading="isAdding"
       @submit="handleAddPerson"
+      @close="closeModal"
     />
 
     <PersonEditModal
-      v-model:open="showEditModal"
+      :open="showEditModal"
       :person="currentEditingPerson"
       :loading="isEditing"
       @submit="handleEditPerson"
+      @close="closeModal"
     />
 
     <!-- Realtime Status Indicator -->
@@ -104,12 +106,32 @@ type Person = {
   visitCount: number
 }
 
-const showAddModal = ref(false)
-const showEditModal = ref(false)
+// Modal state management
+const modalConfig = {
+  allowedModals: ['add-person', 'edit-person'] as const,
+  paramKeys: ['personId'] as const
+}
+
+const { getParam, isModalOpen, openModal, closeModal } = useModalState(modalConfig)
+
+// Specific modal state
+const showAddModal = isModalOpen('add-person')
+const showEditModal = isModalOpen('edit-person')
+const personId = getParam('personId')
+
+// Loading states
 const isAdding = ref(false)
 const isEditing = ref(false)
 
-const currentEditingPerson = ref<Person | null>(null)
+// Current editing person computed from URL personId
+const currentEditingPerson = computed(() => {
+  if (!personId.value || !persons.value) return null
+  return persons.value.find(person => person.id === personId.value) || null
+})
+
+// Convenience functions
+const openAddPersonModal = () => openModal('add-person')
+const openEditPersonModal = (personId: string) => openModal('edit-person', { personId })
 
 // Use the generic realtime list composable
 const {
@@ -151,10 +173,7 @@ const getPersonActions = (person: Person) => [
   [{
     label: 'Edit',
     icon: 'i-heroicons-pencil',
-    onSelect: () => {
-      currentEditingPerson.value = person
-      showEditModal.value = true
-    }
+    onSelect: () => openEditPersonModal(person.id)
   }],
   [{
     label: 'Delete',
@@ -172,7 +191,7 @@ async function handleAddPerson(data: PersonFormData) {
       body: data
     })
     
-    showAddModal.value = false
+    closeModal()
     const toast = useToast()
     toast.add({
       title: 'Success',
@@ -202,8 +221,7 @@ async function handleEditPerson(data: PersonFormData) {
       body: data
     })
     
-    showEditModal.value = false
-    currentEditingPerson.value = null
+    closeModal()
     const toast = useToast()
     toast.add({
       title: 'Success',

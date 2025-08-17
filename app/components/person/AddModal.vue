@@ -28,6 +28,7 @@ type Props = {
 type Emits = {
   'update:open': [value: boolean]
   submit: [data: PersonFormData]
+  close: []
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -38,7 +39,11 @@ const emit = defineEmits<Emits>()
 
 const isOpen = computed({
   get: () => props.open,
-  set: (value) => emit('update:open', value)
+  set: (value) => {
+    if (!value) {
+      emit('close')
+    }
+  }
 })
 
 function handleSubmit(data: PersonFormData) {
@@ -46,6 +51,6 @@ function handleSubmit(data: PersonFormData) {
 }
 
 function handleCancel() {
-  isOpen.value = false
+  emit('close')
 }
 </script>
