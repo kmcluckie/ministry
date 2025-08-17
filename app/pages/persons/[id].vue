@@ -47,7 +47,7 @@
           <UButton
             icon="i-heroicons-pencil"
             size="sm"
-            @click="showEditModal = true"
+            @click="openEditPersonModal"
           >
             Edit
           </UButton>
@@ -94,7 +94,7 @@
           <UButton
             icon="i-heroicons-plus"
             size="sm"
-            @click="showAddVisitModal = true"
+            @click="openAddVisitModal"
           >
             Add Visit
           </UButton>
@@ -134,25 +134,28 @@
 
     <!-- Edit Person Modal -->
     <PersonEditModal
-      v-model:open="showEditModal"
+      :open="showEditPersonModal"
       :person="person"
       :loading="isEditing"
       @submit="handleEdit"
+      @close="closeModal"
     />
 
     <!-- Add Visit Modal -->
     <VisitAddModal
-      v-model:open="showAddVisitModal"
+      :open="showAddVisitModal"
       :loading="isAddingVisit"
       @submit="handleAddVisit"
+      @close="closeModal"
     />
 
     <!-- Edit Visit Modal -->
     <VisitEditModal
-      v-model:open="showEditVisitModal"
+      :open="showEditVisitModal"
       :visit="selectedVisit"
       :loading="isEditingVisit"
       @submit="handleEditVisit"
+      @close="closeModal"
     />
 
     <!-- Realtime Status Indicator -->
@@ -189,11 +192,30 @@ const route = useRoute()
 const toast = useToast()
 const personId = route.params.id as string
 
-// Modal states
-const showEditModal = ref(false)
-const showAddVisitModal = ref(false)
-const showEditVisitModal = ref(false)
-const selectedVisit = ref<Visit | null>(null)
+// Modal state management
+const modalConfig = {
+  allowedModals: ['edit-person', 'add-visit', 'edit-visit'] as const,
+  paramKeys: ['visitId'] as const
+}
+
+const { getParam, isModalOpen, openModal, closeModal } = useModalState(modalConfig)
+
+// Specific modal state
+const showEditPersonModal = isModalOpen('edit-person')
+const showAddVisitModal = isModalOpen('add-visit')
+const showEditVisitModal = isModalOpen('edit-visit')
+const visitId = getParam('visitId')
+
+// Convenience functions
+const openEditPersonModal = () => openModal('edit-person')
+const openAddVisitModal = () => openModal('add-visit')
+const openEditVisitModal = (visitId: string) => openModal('edit-visit', { visitId })
+
+// Selected visit computed from URL visitId
+const selectedVisit = computed(() => {
+  if (!visitId.value || !visits.value) return null
+  return visits.value.find(visit => visit.id === visitId.value) || null
+})
 
 // Loading states
 const isEditing = ref(false)
@@ -284,7 +306,7 @@ async function handleEdit(data: PersonFormData) {
       body: data
     })
     
-    showEditModal.value = false
+    closeModal()
     toast.add({
       title: 'Success',
       description: 'Person updated successfully'
@@ -335,7 +357,7 @@ async function handleAddVisit(data: VisitFormData) {
       body: data
     })
     
-    showAddVisitModal.value = false
+    closeModal()
     
     toast.add({
       title: 'Success',
@@ -361,7 +383,7 @@ async function handleEditVisit(data: VisitFormData & { id: string }) {
       body: { visitedAt: data.visitedAt, notes: data.notes }
     })
     
-    showEditVisitModal.value = false
+    closeModal()
     toast.add({
       title: 'Success',
       description: 'Visit updated successfully'
@@ -405,10 +427,7 @@ const getVisitActions = (visit: Visit) => [
   [{
     label: 'Edit',
     icon: 'i-heroicons-pencil',
-    onSelect: () => {
-      selectedVisit.value = visit
-      showEditVisitModal.value = true
-    }
+    onSelect: () => openEditVisitModal(visit.id)
   }],
   [{
     label: 'Delete',
