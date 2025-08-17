@@ -46,7 +46,7 @@
 </template>
 
 <script setup lang="ts">
-import { personFormSchema, type PersonFormData } from '../../shared/validation/personSchemas'
+import { personFormSchema, type PersonFormData } from '../../../shared/validation/personSchemas'
 import type { FormSubmitEvent } from '@nuxt/ui'
 
 type Props = {

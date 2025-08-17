@@ -3,12 +3,11 @@
     <template #content>
       <UCard>
         <template #header>
-          <h3 class="text-lg font-semibold">Edit Person</h3>
+          <h3 class="text-lg font-semibold">Add New Person</h3>
         </template>
 
         <PersonForm
-          :initial-data="mappedPersonData"
-          submit-label="Save Changes"
+          submit-label="Add Person"
           :loading="loading"
           @submit="handleSubmit"
           @cancel="handleCancel"
@@ -19,18 +18,10 @@
 </template>
 
 <script setup lang="ts">
-import type { PersonFormData } from '../../shared/validation/personSchemas'
-
-type Person = {
-  id: string
-  name: string
-  address: string | null
-  notes: string | null
-}
+import type { PersonFormData } from '../../../shared/validation/personSchemas'
 
 type Props = {
   open: boolean
-  person?: Person | null
   loading?: boolean
 }
 
@@ -48,15 +39,6 @@ const emit = defineEmits<Emits>()
 const isOpen = computed({
   get: () => props.open,
   set: (value) => emit('update:open', value)
-})
-
-const mappedPersonData = computed(() => {
-  if (!props.person) return undefined
-  return {
-    name: props.person.name,
-    address: props.person.address,
-    notes: props.person.notes
-  }
 })
 
 function handleSubmit(data: PersonFormData) {
