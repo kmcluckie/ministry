@@ -1,6 +1,7 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
+import { defineApiHandler, validators, createSuccessResponse } from '../../utils/api-error-handler'
 
-export default defineEventHandler(async (event) => {
+export default defineApiHandler(async (event) => {
   const user = await serverSupabaseUser(event)
   
   if (!user) {
@@ -10,14 +11,8 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const id = getRouterParam(event, 'id')
-  
-  if (!id) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Visit ID is required'
-    })
-  }
+  // Get visit ID from route (validates automatically)
+  const id = validators.visitId(event)
 
   const client = await serverSupabaseClient(event)
   
@@ -34,5 +29,5 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  return { success: true }
+  return createSuccessResponse()
 })
