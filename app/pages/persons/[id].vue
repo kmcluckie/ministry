@@ -141,100 +141,19 @@
     />
 
     <!-- Add Visit Modal -->
-    <UModal v-model:open="showAddVisitModal">
-      <template #content>
-        <UCard>
-          <template #header>
-            <h3 class="text-lg font-semibold">Add Visit</h3>
-          </template>
-
-          <UForm :state="visitForm" :schema="visitFormSchema" class="space-y-4" @submit="handleAddVisit">
-            <UFormField name="visitedAt" label="Date & Time" required>
-              <UInput
-                v-model="visitForm.visitedAt"
-                type="datetime-local"
-                required
-                class="w-full"
-              />
-            </UFormField>
-
-            <UFormField name="notes" label="Notes">
-              <UTextarea
-                v-model="visitForm.notes"
-                placeholder="Add any notes about the visit (optional)"
-                :rows="3"
-                maxlength="2000"
-                class="w-full"
-              />
-            </UFormField>
-
-            <div class="flex justify-end gap-3">
-              <UButton
-                color="neutral"
-                variant="ghost"
-                @click="showAddVisitModal = false"
-              >
-                Cancel
-              </UButton>
-              <UButton
-                type="submit"
-                :loading="isAddingVisit"
-              >
-                Add Visit
-              </UButton>
-            </div>
-          </UForm>
-        </UCard>
-      </template>
-    </UModal>
+    <VisitAddModal
+      v-model:open="showAddVisitModal"
+      :loading="isAddingVisit"
+      @submit="handleAddVisit"
+    />
 
     <!-- Edit Visit Modal -->
-    <UModal v-model:open="showEditVisitModal">
-      <template #content>
-        <UCard>
-          <template #header>
-            <h3 class="text-lg font-semibold">Edit Visit</h3>
-          </template>
-
-          <UForm :state="editVisitForm" :schema="visitFormSchema" class="space-y-4" @submit="handleEditVisit">
-            <UFormField name="visitedAt" label="Date & Time" required>
-              <UInput
-                v-model="editVisitForm.visitedAt"
-                type="datetime-local"
-                required
-                class="w-full"
-              />
-            </UFormField>
-
-            <UFormField name="notes" label="Notes">
-              <UTextarea
-                v-model="editVisitForm.notes"
-                placeholder="Add any notes about the visit (optional)"
-                :rows="3"
-                maxlength="2000"
-                class="w-full"
-              />
-            </UFormField>
-
-            <div class="flex justify-end gap-3">
-              <UButton
-                color="neutral"
-                variant="ghost"
-                @click="showEditVisitModal = false"
-              >
-                Cancel
-              </UButton>
-              <UButton
-                type="submit"
-                :loading="isEditingVisit"
-              >
-                Save Changes
-              </UButton>
-            </div>
-          </UForm>
-        </UCard>
-      </template>
-    </UModal>
+    <VisitEditModal
+      v-model:open="showEditVisitModal"
+      :visit="selectedVisit"
+      :loading="isEditingVisit"
+      @submit="handleEditVisit"
+    />
 
     <!-- Realtime Status Indicator -->
     <RealtimeStatus 
@@ -245,8 +164,7 @@
 </template>
 
 <script setup lang="ts">
-import { visitFormSchema, type VisitFormData, type PersonFormData } from '../../../shared/validation/personSchemas'
-import type { FormSubmitEvent } from '@nuxt/ui'
+import type { VisitFormData, PersonFormData } from '../../../shared/validation/personSchemas'
 
 type Person = {
   id: string
@@ -275,23 +193,12 @@ const personId = route.params.id as string
 const showEditModal = ref(false)
 const showAddVisitModal = ref(false)
 const showEditVisitModal = ref(false)
+const selectedVisit = ref<Visit | null>(null)
 
 // Loading states
 const isEditing = ref(false)
 const isAddingVisit = ref(false)
 const isEditingVisit = ref(false)
-
-
-const visitForm = reactive<VisitFormData>({
-  visitedAt: new Date().toISOString().slice(0, 16),
-  notes: ''
-})
-
-const editVisitForm = reactive<VisitFormData & { id: string }>({
-  id: '',
-  visitedAt: '',
-  notes: ''
-})
 
 // Use realtime item for person data
 const {
@@ -364,14 +271,6 @@ const formatDateTime = (dateString: string) => {
   })
 }
 
-// Convert datetime to input format
-const toInputDateTime = (dateString: string) => {
-  const date = new Date(dateString)
-  if (isNaN(date.getTime())) {
-    return ''
-  }
-  return date.toISOString().slice(0, 16)
-}
 
 // Person actions
 async function handleEdit(data: PersonFormData) {
@@ -427,18 +326,16 @@ async function handleDelete() {
 }
 
 // Visit actions
-async function handleAddVisit(event: FormSubmitEvent<VisitFormData>) {
+async function handleAddVisit(data: VisitFormData) {
   isAddingVisit.value = true
   
   try {
     await $fetch(`/api/persons/${personId}/visits`, {
       method: 'POST',
-      body: event.data
+      body: data
     })
     
     showAddVisitModal.value = false
-    visitForm.visitedAt = new Date().toISOString().slice(0, 16)
-    visitForm.notes = ''
     
     toast.add({
       title: 'Success',
@@ -455,13 +352,13 @@ async function handleAddVisit(event: FormSubmitEvent<VisitFormData>) {
   }
 }
 
-async function handleEditVisit(event: FormSubmitEvent<VisitFormData>) {
+async function handleEditVisit(data: VisitFormData & { id: string }) {
   isEditingVisit.value = true
   
   try {
-    await $fetch(`/api/visits/${editVisitForm.id}`, {
+    await $fetch(`/api/visits/${data.id}`, {
       method: 'PUT',
-      body: event.data
+      body: { visitedAt: data.visitedAt, notes: data.notes }
     })
     
     showEditVisitModal.value = false
@@ -509,9 +406,7 @@ const getVisitActions = (visit: Visit) => [
     label: 'Edit',
     icon: 'i-heroicons-pencil',
     onSelect: () => {
-      editVisitForm.id = visit.id
-      editVisitForm.visitedAt = toInputDateTime(visit.visitedAt)
-      editVisitForm.notes = visit.notes || ''
+      selectedVisit.value = visit
       showEditVisitModal.value = true
     }
   }],

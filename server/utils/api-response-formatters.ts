@@ -105,7 +105,7 @@ export function formatVisitResponse(visit: VisitDomain, personId?: string): Visi
 /**
  * Formats visits array with sorting (most recent first) and person ID
  */
-export function formatVisitsResponse(visits: VisitDomain[], personId: string): VisitResponse[] {
+export function formatVisitsResponse(visits: readonly VisitDomain[], personId: string): VisitResponse[] {
   return [...visits]
     .sort((a, b) => new Date(b.visitedAt).getTime() - new Date(a.visitedAt).getTime())
     .map(visit => formatVisitResponse(visit, personId))
