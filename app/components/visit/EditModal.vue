@@ -39,6 +39,7 @@ type Emits = {
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  visit: null,
   loading: false
 })
 

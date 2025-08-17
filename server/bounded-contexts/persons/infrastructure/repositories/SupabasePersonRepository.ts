@@ -2,7 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { PersonRepository } from '../../domain/repositories/PersonRepository'
 import { Person } from '../../domain/entities/Person'
 import { Visit } from '../../domain/entities/Visit'
-import type { Tables, TablesInsert, TablesUpdate } from '../../../../../types/database.types'
+import type { Tables, TablesInsert } from '../../../../../types/database.types'
 
 // Type aliases for better readability
 type PersonRow = Tables<'persons'>

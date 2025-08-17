@@ -40,6 +40,7 @@ type Emits = {
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  person: null,
   loading: false
 })
 

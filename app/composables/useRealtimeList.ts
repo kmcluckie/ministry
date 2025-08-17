@@ -14,11 +14,6 @@ interface RealtimeListOptions<T> {
   transform?: (item: T) => T
 }
 
-interface RealtimeListState<T> {
-  items: T[]
-  pending: boolean
-  error: string | null
-}
 
 export function useRealtimeList<T = any>(
   options: RealtimeListOptions<T>

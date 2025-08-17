@@ -61,6 +61,7 @@ type Emits = {
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  initialData: undefined,
   submitLabel: 'Save',
   loading: false
 })
