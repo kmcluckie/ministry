@@ -1,20 +1,19 @@
 import type { Database } from '../../types/database.types'
 
 type TableName = keyof Database['public']['Tables']
-type Row<T extends TableName> = Database['public']['Tables'][T]['Row']
 
-interface RealtimeItemOptions<T extends TableName> {
-  table: T
+interface RealtimeItemOptions<T extends { id: string }> {
+  table: TableName
   id: string | Ref<string>
   apiEndpoint: string | ((id: string) => string)
-  transform?: (item: Row<T>) => Row<T>
+  transform?: (item: T) => T
   onDeleted?: () => void
 }
 
-export function useRealtimeItem<T extends TableName>(
+export function useRealtimeItem<T extends { id: string } = { id: string }>(
   options: RealtimeItemOptions<T>
 ) {
-  type Item = Row<T>
+  type Item = T
   
   const itemId = typeof options.id === 'string' ? ref(options.id) : options.id
   
@@ -28,8 +27,7 @@ export function useRealtimeItem<T extends TableName>(
 
   // Use Nuxt's useFetch for initial data loading
   const { data, pending, error, refresh } = useLazyFetch<Item>(endpoint, {
-    key: `${options.table}-${itemId.value}`,
-    default: () => null
+    key: `${options.table}-${itemId.value}`
   })
 
   // Reactive local copy for realtime updates
@@ -38,7 +36,7 @@ export function useRealtimeItem<T extends TableName>(
   // Sync initial data
   watch(data, (newData) => {
     if (newData) {
-      const transformed = options.transform ? options.transform(newData) : newData
+      const transformed = options.transform ? options.transform(newData as T) : (newData as T)
       item.value = transformed
     }
   }, { immediate: true })

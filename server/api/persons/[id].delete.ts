@@ -1,53 +1,44 @@
-import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
+import { createPersonDependencies } from '../../bounded-contexts/persons/infrastructure/dependencies'
+import { PersonNotFoundError } from '../../bounded-contexts/persons/domain/errors/PersonErrors'
+import { UnauthorizedError } from '../../bounded-contexts/shared/domain/errors/DomainError'
 
 export default defineEventHandler(async (event) => {
-  const user = await serverSupabaseUser(event)
-  
-  if (!user) {
-    throw createError({
-      statusCode: 401,
-      statusMessage: 'Unauthorized'
-    })
+  try {
+    // Get dependencies
+    const deps = await createPersonDependencies(event)
+    
+    // Get person ID from route
+    const id = getRouterParam(event, 'id')
+    
+    if (!id) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: 'Person ID is required'
+      })
+    }
+
+    // Use the deletePerson use case
+    await deps.deletePerson(id)
+    
+    return { success: true }
+  } catch (error) {
+    // Handle not found errors
+    if (error instanceof PersonNotFoundError) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: error.message
+      })
+    }
+    
+    // Handle authentication errors
+    if (error instanceof UnauthorizedError) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: error.message
+      })
+    }
+    
+    // Re-throw other errors
+    throw error
   }
-
-  const id = getRouterParam(event, 'id')
-  
-  if (!id) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Person ID is required'
-    })
-  }
-
-  const client = await serverSupabaseClient(event)
-  
-  // First delete all visits associated with this person
-  const { error: visitsError } = await client
-    .from('visits')
-    .delete()
-    .eq('person_id', id)
-    .eq('user_id', user.id)
-
-  if (visitsError) {
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Failed to delete associated visits'
-    })
-  }
-
-  // Then delete the person
-  const { error } = await client
-    .from('persons')
-    .delete()
-    .eq('id', id)
-    .eq('user_id', user.id)
-
-  if (error) {
-    throw createError({
-      statusCode: 500,
-      statusMessage: error.message
-    })
-  }
-
-  return { success: true }
 })

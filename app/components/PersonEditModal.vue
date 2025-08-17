@@ -19,17 +19,13 @@
 </template>
 
 <script setup lang="ts">
+import type { PersonFormData } from '../../shared/validation/personSchemas'
+
 type Person = {
   id: string
   name: string
   address: string | null
   notes: string | null
-}
-
-type PersonFormData = {
-  name: string
-  address: string
-  notes: string
 }
 
 type Props = {
@@ -58,8 +54,8 @@ const mappedPersonData = computed(() => {
   if (!props.person) return undefined
   return {
     name: props.person.name,
-    address: props.person.address || '',
-    notes: props.person.notes || ''
+    address: props.person.address,
+    notes: props.person.notes
   }
 })
 

@@ -13,7 +13,7 @@
         </p>
       </div>
       
-      <UForm :schema="schema" :state="state" @submit="onSubmit" class="mt-8 space-y-4 flex flex-col">
+      <UForm :schema="schema" :state="state" class="mt-8 space-y-4 flex flex-col" @submit="onSubmit">
         <UFormField label="Email" name="email">
           <UInput v-model="state.email" type="email" placeholder="Enter your email" class="w-full" />
         </UFormField>
@@ -67,11 +67,11 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     if (error) throw error
     
     await router.push('/persons')
-  } catch (error: any) {
+  } catch (error: unknown) {
     const toast = useToast()
     toast.add({
       title: 'Error',
-      description: error.message || 'Failed to sign in',
+      description: (error as Error)?.message || 'Failed to sign in',
       color: 'error'
     })
   } finally {

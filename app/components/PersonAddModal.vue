@@ -18,11 +18,7 @@
 </template>
 
 <script setup lang="ts">
-type PersonFormData = {
-  name: string
-  address: string
-  notes: string
-}
+import type { PersonFormData } from '../../shared/validation/personSchemas'
 
 type Props = {
   open: boolean

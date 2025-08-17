@@ -64,7 +64,7 @@
         <USeparator class="my-3" />
         <div class="flex items-center text-xs text-[var(--ui-text-muted)]">
           <UIcon name="i-heroicons-calendar" class="h-3 w-3 mr-1" />
-          Added {{ formatDate(person.created_at) }}
+          Added {{ formatDate(person.createdAt) }}
         </div>
       </div>
     </div>
@@ -91,15 +91,17 @@
 </template>
 
 <script setup lang="ts">
+import type { PersonFormData } from '../../../shared/validation/personSchemas'
 
 type Person = {
   id: string
-  user_id: string
+  userId: string
   name: string
   address: string | null
   notes: string | null
-  created_at: string
-  updated_at: string
+  createdAt: string
+  updatedAt: string
+  visitCount: number
 }
 
 const showAddModal = ref(false)
@@ -161,7 +163,7 @@ const getPersonActions = (person: Person) => [
   }]
 ]
 
-async function handleAddPerson(data: { name: string; address: string; notes: string }) {
+async function handleAddPerson(data: PersonFormData) {
   isAdding.value = true
   
   try {
@@ -188,7 +190,7 @@ async function handleAddPerson(data: { name: string; address: string; notes: str
   }
 }
 
-async function handleEditPerson(data: { name: string; address: string; notes: string }) {
+async function handleEditPerson(data: PersonFormData) {
   if (!currentEditingPerson.value) return
   
   isEditing.value = true

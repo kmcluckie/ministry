@@ -40,7 +40,7 @@
           </div>
           <h1 class="text-2xl font-bold text-[var(--ui-text)]">{{ person.name }}</h1>
           <p class="mt-1 text-sm text-[var(--ui-text-muted)]">
-            Added {{ formatDate(person.created_at) }}
+            Added {{ formatDate(person.createdAt) }}
           </p>
         </div>
         <div class="flex gap-2">
@@ -106,7 +106,7 @@
             <div class="flex justify-between items-start">
               <div class="flex-1">
                 <p class="font-medium text-[var(--ui-text)]">
-                  {{ formatDateTime(visit.visited_at) }}
+                  {{ formatDateTime(visit.visitedAt) }}
                 </p>
                 <p v-if="visit.notes" class="mt-1 text-sm text-[var(--ui-text-muted)]">
                   {{ visit.notes }}
@@ -148,10 +148,10 @@
             <h3 class="text-lg font-semibold">Add Visit</h3>
           </template>
 
-          <UForm :state="visitForm" @submit="handleAddVisit" class="space-y-4">
-            <UFormField name="visited_at" label="Date & Time" required>
+          <UForm :state="visitForm" :schema="visitFormSchema" class="space-y-4" @submit="handleAddVisit">
+            <UFormField name="visitedAt" label="Date & Time" required>
               <UInput
-                v-model="visitForm.visited_at"
+                v-model="visitForm.visitedAt"
                 type="datetime-local"
                 required
                 class="w-full"
@@ -196,10 +196,10 @@
             <h3 class="text-lg font-semibold">Edit Visit</h3>
           </template>
 
-          <UForm :state="editVisitForm" @submit="handleEditVisit" class="space-y-4">
-            <UFormField name="visited_at" label="Date & Time" required>
+          <UForm :state="editVisitForm" :schema="visitFormSchema" class="space-y-4" @submit="handleEditVisit">
+            <UFormField name="visitedAt" label="Date & Time" required>
               <UInput
-                v-model="editVisitForm.visited_at"
+                v-model="editVisitForm.visitedAt"
                 type="datetime-local"
                 required
                 class="w-full"
@@ -245,23 +245,26 @@
 </template>
 
 <script setup lang="ts">
+import { visitFormSchema, type VisitFormData, type PersonFormData } from '../../../shared/validation/personSchemas'
+import type { FormSubmitEvent } from '@nuxt/ui'
+
 type Person = {
   id: string
-  user_id: string
+  userId: string
   name: string
   address: string | null
   notes: string | null
-  created_at: string
-  updated_at: string
+  createdAt: string
+  updatedAt: string
 }
 
 type Visit = {
   id: string
-  person_id: string
-  user_id: string
-  visited_at: string
+  personId: string
+  userId: string
+  visitedAt: string
   notes: string | null
-  created_at: string
+  createdAt: string
 }
 
 const route = useRoute()
@@ -279,14 +282,14 @@ const isAddingVisit = ref(false)
 const isEditingVisit = ref(false)
 
 
-const visitForm = reactive({
-  visited_at: new Date().toISOString().slice(0, 16),
+const visitForm = reactive<VisitFormData>({
+  visitedAt: new Date().toISOString().slice(0, 16),
   notes: ''
 })
 
-const editVisitForm = reactive({
+const editVisitForm = reactive<VisitFormData & { id: string }>({
   id: '',
-  visited_at: '',
+  visitedAt: '',
   notes: ''
 })
 
@@ -297,7 +300,7 @@ const {
   error,
   realtimeState: personRealtimeState,
   reconnect: reconnectPerson
-} = useRealtimeItem({
+} = useRealtimeItem<Person>({
   table: 'persons',
   id: personId,
   apiEndpoint: `/api/persons/${personId}`,
@@ -313,7 +316,7 @@ const {
   table: 'visits',
   apiEndpoint: `/api/persons/${personId}/visits`,
   filter: `person_id=eq.${personId}`,
-  sortBy: 'visited_at',
+  sortBy: 'visitedAt',
   sortOrder: 'desc'
 })
 
@@ -335,7 +338,11 @@ const reconnectRealtime = () => {
 
 // Format functions
 const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('en-US', {
+  const date = new Date(dateString)
+  if (isNaN(date.getTime())) {
+    return 'Invalid Date'
+  }
+  return date.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric'
@@ -343,7 +350,11 @@ const formatDate = (dateString: string) => {
 }
 
 const formatDateTime = (dateString: string) => {
-  return new Date(dateString).toLocaleString('en-US', {
+  const date = new Date(dateString)
+  if (isNaN(date.getTime())) {
+    return 'Invalid Date'
+  }
+  return date.toLocaleString('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
@@ -355,11 +366,15 @@ const formatDateTime = (dateString: string) => {
 
 // Convert datetime to input format
 const toInputDateTime = (dateString: string) => {
-  return new Date(dateString).toISOString().slice(0, 16)
+  const date = new Date(dateString)
+  if (isNaN(date.getTime())) {
+    return ''
+  }
+  return date.toISOString().slice(0, 16)
 }
 
 // Person actions
-async function handleEdit(data: { name: string; address: string; notes: string }) {
+async function handleEdit(data: PersonFormData) {
   if (!person.value) return
   
   isEditing.value = true
@@ -412,17 +427,17 @@ async function handleDelete() {
 }
 
 // Visit actions
-async function handleAddVisit() {
+async function handleAddVisit(event: FormSubmitEvent<VisitFormData>) {
   isAddingVisit.value = true
   
   try {
     await $fetch(`/api/persons/${personId}/visits`, {
       method: 'POST',
-      body: visitForm
+      body: event.data
     })
     
     showAddVisitModal.value = false
-    visitForm.visited_at = new Date().toISOString().slice(0, 16)
+    visitForm.visitedAt = new Date().toISOString().slice(0, 16)
     visitForm.notes = ''
     
     toast.add({
@@ -440,16 +455,13 @@ async function handleAddVisit() {
   }
 }
 
-async function handleEditVisit() {
+async function handleEditVisit(event: FormSubmitEvent<VisitFormData>) {
   isEditingVisit.value = true
   
   try {
     await $fetch(`/api/visits/${editVisitForm.id}`, {
       method: 'PUT',
-      body: {
-        visited_at: editVisitForm.visited_at,
-        notes: editVisitForm.notes
-      }
+      body: event.data
     })
     
     showEditVisitModal.value = false
@@ -498,7 +510,7 @@ const getVisitActions = (visit: Visit) => [
     icon: 'i-heroicons-pencil',
     onSelect: () => {
       editVisitForm.id = visit.id
-      editVisitForm.visited_at = toInputDateTime(visit.visited_at)
+      editVisitForm.visitedAt = toInputDateTime(visit.visitedAt)
       editVisitForm.notes = visit.notes || ''
       showEditVisitModal.value = true
     }

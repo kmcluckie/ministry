@@ -13,7 +13,7 @@
         </p>
       </div>
       
-      <UForm :schema="schema" :state="state" @submit="onSubmit" class="mt-8 space-y-4 flex flex-col">
+      <UForm :schema="schema" :state="state" class="mt-8 space-y-4 flex flex-col" @submit="onSubmit">
         <UFormGroup label="Email" name="email">
           <UInput v-model="state.email" type="email" placeholder="Enter your email" class="w-full" />
         </UFormGroup>

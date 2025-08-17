@@ -2,17 +2,16 @@ import type { Database } from '../../types/database.types'
 import { debounce } from 'lodash-es'
 
 type TableName = keyof Database['public']['Tables']
-type Row<T extends TableName> = Database['public']['Tables'][T]['Row']
 
-interface RealtimeListOptions<T extends TableName> {
-  table: T
+interface RealtimeListOptions<T> {
+  table: TableName
   apiEndpoint: string
-  searchField?: keyof Row<T> | string
-  sortBy?: keyof Row<T> | string
+  searchField?: string
+  sortBy?: string
   sortOrder?: 'asc' | 'desc'
   initialSearch?: string
   filter?: string
-  transform?: (item: Row<T>) => Row<T>
+  transform?: (item: T) => T
 }
 
 interface RealtimeListState<T> {
@@ -21,10 +20,10 @@ interface RealtimeListState<T> {
   error: string | null
 }
 
-export function useRealtimeList<T extends TableName>(
+export function useRealtimeList<T = any>(
   options: RealtimeListOptions<T>
 ) {
-  type Item = Row<T>
+  type Item = T
   
   const searchQuery = ref(options.initialSearch || '')
   
@@ -47,8 +46,8 @@ export function useRealtimeList<T extends TableName>(
     const order = options.sortOrder || 'asc'
     
     items.value.sort((a, b) => {
-      const aVal = a[sortField]
-      const bVal = b[sortField]
+      const aVal = (a as any)[sortField]
+      const bVal = (b as any)[sortField]
       
       if (typeof aVal === 'string' && typeof bVal === 'string') {
         const result = aVal.localeCompare(bVal)

@@ -18,11 +18,11 @@
       <UButton
         v-if="state.error && state.connectionStatus !== 'CONNECTING'"
         icon="i-heroicons-arrow-path"
-        color="white"
+        color="neutral"
         variant="ghost"
         size="xs"
+        :loading="false"
         @click="reconnect"
-        :loading="state.connectionStatus === 'CONNECTING'"
       />
     </div>
   </Transition>

@@ -59,7 +59,7 @@ export function useRealtimeSubscription<T extends TableName>(
     }
 
     channel.on(
-      'postgres_changes',
+      'postgres_changes' as any,
       config,
       (payload: RealtimePostgresChangesPayload<Row<T>>) => {
         try {

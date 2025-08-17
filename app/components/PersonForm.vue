@@ -1,5 +1,5 @@
 <template>
-  <UForm :state="formData" @submit="handleSubmit" class="space-y-4">
+  <UForm :state="formData" :schema="personFormSchema" class="space-y-4" @submit="handleSubmit">
     <UFormField name="name" label="Name" required>
       <UInput
         v-model="formData.name"
@@ -46,11 +46,8 @@
 </template>
 
 <script setup lang="ts">
-type PersonFormData = {
-  name: string
-  address: string
-  notes: string
-}
+import { personFormSchema, type PersonFormData } from '../../shared/validation/personSchemas'
+import type { FormSubmitEvent } from '@nuxt/ui'
 
 type Props = {
   initialData?: Partial<PersonFormData>
@@ -72,19 +69,19 @@ const emit = defineEmits<Emits>()
 
 const formData = reactive<PersonFormData>({
   name: props.initialData?.name || '',
-  address: props.initialData?.address || '',
-  notes: props.initialData?.notes || ''
+  address: props.initialData?.address || null,
+  notes: props.initialData?.notes || null
 })
 
 watch(() => props.initialData, (newData) => {
   if (newData) {
     formData.name = newData.name || ''
-    formData.address = newData.address || ''
-    formData.notes = newData.notes || ''
+    formData.address = newData.address || null
+    formData.notes = newData.notes || null
   }
 }, { immediate: true, deep: true })
 
-function handleSubmit() {
-  emit('submit', { ...formData })
+function handleSubmit(event: FormSubmitEvent<PersonFormData>) {
+  emit('submit', event.data)
 }
 </script>
