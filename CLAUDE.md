@@ -59,6 +59,10 @@ Follow the official Nuxt.js and Vue.js documentation for up-to-date best practic
 - Test client-side components and interactions.
 - Test edge cases and error handling.
 
+# Checking tools
+- Typechecking can be done by running `npx nuxi typecheck`
+- Linting can be done by running `npm run lint --fix`
+
 # Tools
 - Use context7 MCP for up-to-date documentation for all libraries and frameworks
 - User serena MCP for semantic search of the codebase
