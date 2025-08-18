@@ -1,5 +1,18 @@
 <template>
-  <div class="max-w-4xl mx-auto py-6 px-4">
+  <NuxtLayout name="default">
+    <!-- Back button in navigation slot -->
+    <template #navigation>
+      <UButton
+        v-if="!pending && !error && person"
+        icon="i-heroicons-arrow-left"
+        color="neutral"
+        variant="ghost"
+        size="sm"
+        @click="navigateTo('/persons')"
+      />
+    </template>
+
+    <div class="max-w-4xl mx-auto py-6 px-4">
     <!-- Loading State -->
     <div v-if="pending" class="flex justify-center py-8">
       <UIcon name="i-heroicons-arrow-path" class="animate-spin h-6 w-6 text-[var(--ui-text-muted)]" />
@@ -24,57 +37,26 @@
 
     <!-- Person Details -->
     <div v-else>
-      <!-- Header with Actions -->
-      <div class="mb-6 flex justify-between items-start">
-        <div>
-          <div class="flex items-center gap-3 mb-2">
+      <!-- Header -->
+      <div class="mb-3">
+        <!-- Person Name and Actions -->
+        <div class="flex justify-between items-start">
+          <h1 class="text-2xl font-bold text-[var(--ui-text)] mb-1">{{ person.name }}</h1>
+          <UDropdownMenu :items="getPersonActions()">
             <UButton
-              icon="i-heroicons-arrow-left"
               color="neutral"
               variant="ghost"
+              icon="i-heroicons-ellipsis-vertical"
               size="sm"
-              @click="navigateTo('/persons')"
-            >
-              Back
-            </UButton>
-          </div>
-          <h1 class="text-2xl font-bold text-[var(--ui-text)]">{{ person.name }}</h1>
-          <p class="mt-1 text-sm text-[var(--ui-text-muted)]">
-            Added {{ formatDate(person.createdAt) }}
-          </p>
+            />
+          </UDropdownMenu>
         </div>
-        <div class="flex gap-2">
-          <UButton
-            icon="i-heroicons-pencil"
-            size="sm"
-            @click="openEditPersonModal"
-          >
-            Edit
-          </UButton>
-          <UButton
-            icon="i-heroicons-trash"
-            color="error"
-            variant="soft"
-            size="sm"
-            @click="handleDelete"
-          >
-            Delete
-          </UButton>
-        </div>
-      </div>
-
-      <!-- Person Information Card -->
-      <UCard class="mb-6">
-        <template #header>
-          <h2 class="text-lg font-semibold">Information</h2>
-        </template>
-        
-        <div class="space-y-4">
-          <div>
-            <label class="text-sm font-medium text-[var(--ui-text-muted)]">Name</label>
-            <p class="mt-1 text-[var(--ui-text)]">{{ person.name }}</p>
-          </div>
+        <p class="text-xs text-[var(--ui-text-muted)]">
+          Added {{ formatDate(person.createdAt) }}
+        </p>
           
+        <!-- Person Information -->
+        <div class="mt-4 space-y-3">
           <div v-if="person.address">
             <label class="text-sm font-medium text-[var(--ui-text-muted)]">Address</label>
             <p class="mt-1 text-[var(--ui-text)] whitespace-pre-wrap">{{ person.address }}</p>
@@ -85,10 +67,12 @@
             <p class="mt-1 text-[var(--ui-text)] whitespace-pre-wrap">{{ person.notes }}</p>
           </div>
         </div>
-      </UCard>
+
+        <USeparator class="my-4" />
+      </div>
 
       <!-- Visits Section -->
-      <div class="mb-6">
+      <div class="mb-4">
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-lg font-semibold text-[var(--ui-text)]">Visits</h2>
           <UButton
@@ -108,9 +92,6 @@
                 <p class="font-medium text-[var(--ui-text)]">
                   {{ formatDateTime(visit.visitedAt) }}
                 </p>
-                <p v-if="visit.notes" class="mt-1 text-sm text-[var(--ui-text-muted)]">
-                  {{ visit.notes }}
-                </p>
               </div>
               <UDropdownMenu :items="getVisitActions(visit)">
                 <UButton
@@ -121,6 +102,9 @@
                 />
               </UDropdownMenu>
             </div>
+                <p v-if="visit.notes" class="mt-1 text-sm text-[var(--ui-text-muted)]">
+                  {{ visit.notes }}
+                </p>
           </UCard>
         </div>
         
@@ -163,11 +147,17 @@
       :state="combinedRealtimeState" 
       :reconnect="reconnectRealtime" 
     />
-  </div>
+    </div>
+  </NuxtLayout>
 </template>
 
 <script setup lang="ts">
 import type { VisitFormData, PersonFormData } from '../../../shared/validation/personSchemas'
+
+// Disable default layout since we're using NuxtLayout explicitly
+definePageMeta({
+  layout: false
+})
 
 type Person = {
   id: string
@@ -412,6 +402,20 @@ async function handleDeleteVisit(id: string) {
     })
   }
 }
+
+// Get person actions for dropdown
+const getPersonActions = () => [
+  [{
+    label: 'Edit',
+    icon: 'i-heroicons-pencil',
+    onSelect: () => openEditPersonModal()
+  }],
+  [{
+    label: 'Delete',
+    icon: 'i-heroicons-trash',
+    onSelect: () => handleDelete()
+  }]
+]
 
 // Get visit actions for dropdown
 const getVisitActions = (visit: Visit) => [

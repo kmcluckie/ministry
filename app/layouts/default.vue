@@ -8,7 +8,11 @@
             Ministry Tracker
           </h1>
           
-          <div class="flex space-x-2 sm:space-x-4">
+          <div class="flex items-center space-x-2 sm:space-x-4">
+            <!-- Navigation slot for page-specific navigation elements -->
+            <slot name="navigation" />
+            
+            <div class="flex space-x-2 sm:space-x-4">
             <NuxtLink 
               to="/persons" 
               class="text-[var(--ui-text-muted)] hover:text-[var(--ui-primary)] px-2 sm:px-3 py-2 rounded-md text-sm font-medium"
@@ -23,6 +27,7 @@
             >
               Time
             </NuxtLink>
+            </div>
           </div>
         </div>
         

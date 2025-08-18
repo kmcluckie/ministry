@@ -47,9 +47,6 @@
             <p v-if="person.address" class="text-sm text-[var(--ui-text-muted)] mt-1">
               {{ person.address }}
             </p>
-            <p v-if="person.notes" class="text-sm text-[var(--ui-text-muted)] mt-2 line-clamp-2">
-              {{ person.notes }}
-            </p>
           </div>
           <UDropdownMenu :items="getPersonActions(person)">
             <UButton
@@ -61,10 +58,9 @@
             />
           </UDropdownMenu>
         </div>
-        <USeparator class="my-3" />
-        <div class="flex items-center text-xs text-[var(--ui-text-muted)]">
-          <UIcon name="i-heroicons-calendar" class="h-3 w-3 mr-1" />
-          Added {{ formatDate(person.createdAt) }}
+        <USeparator v-if="person.notes" class="my-3" />
+        <div v-if="person.notes" class="text-sm text-[var(--ui-text-muted)] line-clamp-2">
+          {{ person.notes }}
         </div>
       </div>
     </div>
