@@ -22,11 +22,11 @@ export function useRealtimeList<T = any>(
   
   const searchQuery = ref(options.initialSearch || '')
   
-  // Use Nuxt's useFetch for initial data loading
+  // Use Nuxt's useFetch for initial data loading with reactive query
   const { data, pending, error, refresh } = useLazyFetch<Item[]>(options.apiEndpoint, {
-    query: {
+    query: computed(() => ({
       ...(searchQuery.value && options.searchField ? { search: searchQuery.value } : {})
-    },
+    })),
     default: () => []
   })
 
@@ -83,14 +83,13 @@ export function useRealtimeList<T = any>(
     }
   })
 
-  // Search functionality
-  const debouncedRefresh = debounce(() => {
-    refresh()
+  // Search functionality with debouncing
+  const debouncedSetSearch = debounce((query: string) => {
+    searchQuery.value = query
   }, 300)
 
   const setSearch = (query: string) => {
-    searchQuery.value = query
-    debouncedRefresh()
+    debouncedSetSearch(query)
   }
 
   // Manual refresh

@@ -94,7 +94,7 @@ export class SupabasePersonRepository implements PersonRepository {
       .order('name')
 
     if (options.search) {
-      query = query.ilike('name', `%${options.search}%`)
+      query = query.or(`name.ilike.%${options.search}%,address.ilike.%${options.search}%,notes.ilike.%${options.search}%`)
     }
 
     if (options.limit) {
