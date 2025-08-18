@@ -3,11 +3,7 @@
     <!-- Navigation Header -->
     <nav class="border-b border-[var(--ui-border)] px-4 py-3">
       <div class="max-w-7xl mx-auto flex justify-between items-center">
-        <div class="flex items-center space-x-2 sm:space-x-8">
-          <h1 class="hidden sm:block text-xl font-semibold text-[var(--ui-text)]">
-            Ministry Tracker
-          </h1>
-          
+        <div class="flex items-center space-x-2 sm:space-x-8">          
           <div class="flex items-center space-x-2 sm:space-x-4">
             <!-- Navigation slot for page-specific navigation elements -->
             <slot name="navigation" />
