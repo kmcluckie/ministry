@@ -23,5 +23,9 @@ logs
 .env.*
 !.env.example
 
+# Tests
+test-results
+playwright-report
+
 # Tools
 .serena
