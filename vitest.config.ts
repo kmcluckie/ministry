@@ -1,15 +1,31 @@
 import { defineConfig } from 'vitest/config'
+import { defineVitestProject } from '@nuxt/test-utils/config'
 
 export default defineConfig({
   test: {
-    environment: 'happy-dom',
     globals: true,
-    setupFiles: ['./tests/setup.ts'],
     testTimeout: 30000, // 30s for integration tests
-    // Separate test types
-    include: [
-      '**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
-      '**/*.integration.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'
+    projects: [
+      {
+        test: {
+          name: 'unit',
+          include: ['server/**/*.{test,spec}.ts', 'shared/**/*.{test,spec}.ts'],
+          environment: 'node',
+          setupFiles: ['./tests/setup.ts']
+        }
+      },
+      await defineVitestProject({
+        test: {
+          name: 'nuxt',
+          include: ['app/**/*.{test,spec}.ts', 'components/**/*.{test,spec}.ts', 'pages/**/*.{test,spec}.ts'],
+          environment: 'nuxt',
+          environmentOptions: {
+            nuxt: {
+              domEnvironment: 'happy-dom'
+            }
+          }
+        }
+      })
     ]
   }
 })
