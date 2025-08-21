@@ -20,25 +20,25 @@
       <div>
         <USelect
           v-model="selectedTypes"
-          :options="typeOptions"
+          :items="typeOptions"
           multiple
-          placeholder="Filter by type"
+          placeholder="Type"
           @change="applyFilters"
         />
       </div>
       <div>
         <USelect
           v-model="selectedMonth"
-          :options="monthOptions"
-          placeholder="Filter by month"
+          :items="monthOptions"
+          placeholder="Month"
           @change="applyFilters"
         />
       </div>
       <div>
         <USelect
           v-model="selectedServiceYear"
-          :options="serviceYearOptions"
-          placeholder="Filter by service year"
+          :items="serviceYearOptions"
+          placeholder="Service Year"
           @change="applyFilters"
         />
       </div>
@@ -54,7 +54,7 @@
     </div>
 
     <!-- Summary -->
-    <div v-if="times && times.length > 0" class="mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div v-if="times && times.length > 0" class="mb-6 grid grid-cols-2 gap-4">
       <div class="rounded-lg border border-[var(--ui-border)] p-4">
         <div class="text-2xl font-bold text-[var(--ui-text)]">{{ totalRecords }}</div>
         <div class="text-sm text-[var(--ui-text-muted)]">Records</div>
@@ -62,10 +62,6 @@
       <div class="rounded-lg border border-[var(--ui-border)] p-4">
         <div class="text-2xl font-bold text-[var(--ui-text)]">{{ totalHours }}</div>
         <div class="text-sm text-[var(--ui-text-muted)]">Total Hours</div>
-      </div>
-      <div class="rounded-lg border border-[var(--ui-border)] p-4">
-        <div class="text-2xl font-bold text-[var(--ui-text)]">{{ averagePerRecord }}</div>
-        <div class="text-sm text-[var(--ui-text-muted)]">Avg per Record</div>
       </div>
     </div>
     
@@ -105,9 +101,6 @@
             </div>
             <div class="mt-2 text-lg font-semibold text-[var(--ui-text)]">
               {{ formatTime(time.hours, time.minutes) }}
-            </div>
-            <div class="text-xs text-[var(--ui-text-muted)] mt-1">
-              {{ time.totalMinutes }} minutes total
             </div>
           </div>
           <UDropdownMenu :items="getTimeActions(time)">
@@ -170,8 +163,8 @@ const isEditing = ref(false)
 
 // Filter states
 const selectedTypes = ref<string[]>([])
-const selectedMonth = ref<string | null>(null)
-const selectedServiceYear = ref<number | null>(null)
+const selectedMonth = ref<string>('all')
+const selectedServiceYear = ref<string>('all')
 
 // Data
 const times = ref<TimeRecord[]>([])
@@ -194,7 +187,9 @@ const typeOptions = computed(() => {
 })
 
 const monthOptions = computed(() => {
-  const months = []
+  const months = [
+    { label: 'All months', value: 'all' }
+  ]
   const currentDate = new Date()
   
   // Generate last 12 months
@@ -215,7 +210,9 @@ const monthOptions = computed(() => {
 const serviceYearOptions = computed(() => {
   const currentYear = new Date().getFullYear()
   const currentMonth = new Date().getMonth() + 1
-  const years = []
+  const years = [
+    { label: 'All service years', value: 'all' }
+  ]
   
   // Service year starts in September, so if we're before September, current service year is previous year
   const baseYear = currentMonth >= 9 ? currentYear : currentYear - 1
@@ -225,7 +222,7 @@ const serviceYearOptions = computed(() => {
     const year = baseYear - i
     years.push({
       label: `${year}-${year + 1} Service Year`,
-      value: year + 1 // Service year ends in the following calendar year
+      value: (year + 1).toString() // Service year ends in the following calendar year
     })
   }
   
@@ -234,7 +231,7 @@ const serviceYearOptions = computed(() => {
 
 // Filter status
 const hasActiveFilters = computed(() => {
-  return selectedTypes.value.length > 0 || selectedMonth.value !== null || selectedServiceYear.value !== null
+  return selectedTypes.value.length > 0 || selectedMonth.value !== 'all' || selectedServiceYear.value !== 'all'
 })
 
 // Summary calculations
@@ -268,7 +265,7 @@ async function loadTimes() {
       selectedTypes.value.forEach(type => params.append('type', type))
     }
     
-    if (selectedMonth.value) {
+    if (selectedMonth.value && selectedMonth.value !== 'all') {
       const [year, month] = selectedMonth.value.split('-')
       if (year && month) {
         params.set('year', year)
@@ -276,8 +273,8 @@ async function loadTimes() {
       }
     }
     
-    if (selectedServiceYear.value) {
-      params.set('serviceYear', selectedServiceYear.value.toString())
+    if (selectedServiceYear.value && selectedServiceYear.value !== 'all') {
+      params.set('serviceYear', selectedServiceYear.value)
     }
     
     const url = `/api/times${params.toString() ? '?' + params.toString() : ''}`
@@ -306,8 +303,8 @@ function applyFilters() {
 
 function clearFilters() {
   selectedTypes.value = []
-  selectedMonth.value = null
-  selectedServiceYear.value = null
+  selectedMonth.value = 'all'
+  selectedServiceYear.value = 'all'
   loadTimes()
 }
 
