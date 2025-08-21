@@ -28,6 +28,17 @@ export type VisitResponse = {
   createdAt: string
 }
 
+export type TimeResponse = {
+  id: string
+  type: string
+  recordedOn: string
+  hours: number
+  minutes: number
+  totalMinutes: number
+  createdAt: string
+  updatedAt: string
+}
+
 /**
  * Domain object interfaces for better type safety
  * These allow for flexible date types (Date objects or strings)
@@ -48,6 +59,17 @@ export interface VisitDomain {
   visitedAt: Date | string
   notes: string | null
   createdAt: Date | string
+}
+
+export interface TimeDomain {
+  id: string
+  type: string
+  recordedOn: Date | string
+  hours: number
+  minutes: number
+  createdAt: Date | string
+  updatedAt: Date | string
+  getTotalMinutes(): number
 }
 
 /**
@@ -122,6 +144,23 @@ export function formatArrayResponse<T, R>(
 }
 
 /**
+ * Formats a time domain object to API response DTO
+ */
+export function formatTimeResponse(time: TimeDomain): TimeResponse {
+  const recordedOn = time.recordedOn instanceof Date ? time.recordedOn.toISOString().split('T')[0] : time.recordedOn
+  return {
+    id: time.id,
+    type: time.type,
+    recordedOn: recordedOn || '',
+    hours: time.hours,
+    minutes: time.minutes,
+    totalMinutes: time.getTotalMinutes(),
+    createdAt: time.createdAt instanceof Date ? time.createdAt.toISOString() : time.createdAt,
+    updatedAt: time.updatedAt instanceof Date ? time.updatedAt.toISOString() : time.updatedAt,
+  }
+}
+
+/**
  * Type guards for better type safety
  */
 export const typeGuards = {
@@ -131,4 +170,8 @@ export const typeGuards = {
   hasGetTotalVisitCount: (person: unknown): person is PersonDomain =>
     person !== null && typeof person === 'object' && 'getTotalVisitCount' in person && 
     typeof (person as PersonDomain).getTotalVisitCount === 'function',
+    
+  hasGetTotalMinutes: (time: unknown): time is TimeDomain =>
+    time !== null && typeof time === 'object' && 'getTotalMinutes' in time && 
+    typeof (time as TimeDomain).getTotalMinutes === 'function',
 }
