@@ -37,32 +37,28 @@
     </UFormField>
 
     <UFormField name="recordedOn" label="Date" required>
-      <UInput
-        v-model="formData.recordedOn"
-        type="date"
-        placeholder="Select date"
+      <UCalendar
+        v-model="selectedDate"
         class="w-full"
       />
     </UFormField>
 
     <div class="grid grid-cols-2 gap-4">
       <UFormField name="hours" label="Hours" required>
-        <UInput
-          v-model.number="formData.hours"
-          type="number"
-          min="0"
-          max="24"
+        <UInputNumber
+          v-model="formData.hours"
+          :min="0"
+          :max="24"
           placeholder="0"
           class="w-full"
         />
       </UFormField>
 
       <UFormField name="minutes" label="Minutes" required>
-        <UInput
-          v-model.number="formData.minutes"
-          type="number"
-          min="0"
-          max="59"
+        <UInputNumber
+          v-model="formData.minutes"
+          :min="0"
+          :max="59"
           placeholder="0"
           class="w-full"
         />
@@ -90,6 +86,7 @@
 <script setup lang="ts">
 import { timeFormSchema, type TimeFormData } from '../../../shared/validation/timeSchemas'
 import type { FormSubmitEvent } from '@nuxt/ui'
+import { CalendarDate } from '@internationalized/date'
 
 type Props = {
   initialData?: {
@@ -123,6 +120,29 @@ const formData = reactive<TimeFormData>({
   recordedOn: (props.initialData?.recordedOn ?? new Date().toISOString().split('T')[0]) as string,
   hours: props.initialData?.hours ?? 0,
   minutes: props.initialData?.minutes ?? 0
+})
+
+// Calendar date handling
+const selectedDate = computed({
+  get: () => {
+    if (formData.recordedOn) {
+      const parts = formData.recordedOn.split('-').map(Number)
+      const [year, month, day] = parts
+      if (year && month && day) {
+        return new CalendarDate(year, month, day)
+      }
+    }
+    const today = new Date()
+    return new CalendarDate(today.getFullYear(), today.getMonth() + 1, today.getDate())
+  },
+  set: (value) => {
+    if (value) {
+      const year = value.year.toString()
+      const month = value.month.toString().padStart(2, '0')
+      const day = value.day.toString().padStart(2, '0')
+      formData.recordedOn = `${year}-${month}-${day}`
+    }
+  }
 })
 
 

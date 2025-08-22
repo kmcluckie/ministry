@@ -1,48 +1,29 @@
 <template>
   <div class="max-w-7xl mx-auto p-4">
     <div class="mb-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-      <div class="flex-1">
-        <h1 class="text-2xl font-bold text-[var(--ui-text)]">Time Tracking</h1>
-        <p class="mt-1 text-sm text-[var(--ui-text-muted)]">
-          Track your ministry time and activities
-        </p>
-      </div>
-      <UButton 
-        icon="i-heroicons-plus" 
-        @click="openAddTimeModal"
-      >
-        Add Time
-      </UButton>
-    </div>
-
-    <!-- Filters -->
-    <div class="mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div>
+      <div class="flex-1 flex flex-wrap gap-3">
         <USelect
           v-model="selectedTypes"
           :items="typeOptions"
           multiple
           placeholder="Type"
+          class="w-40"
           @change="applyFilters"
         />
-      </div>
-      <div>
         <USelect
           v-model="selectedMonth"
           :items="monthOptions"
           placeholder="Month"
+          class="w-44"
           @change="applyFilters"
         />
-      </div>
-      <div>
         <USelect
           v-model="selectedServiceYear"
           :items="serviceYearOptions"
           placeholder="Service Year"
+          class="w-48"
           @change="applyFilters"
         />
-      </div>
-      <div class="flex items-center justify-end">
         <UButton
           color="neutral"
           variant="ghost"
@@ -51,6 +32,12 @@
           Clear Filters
         </UButton>
       </div>
+      <UButton 
+        icon="i-heroicons-plus" 
+        @click="openAddTimeModal"
+      >
+        Add Time
+      </UButton>
     </div>
 
     <!-- Summary -->
@@ -244,14 +231,6 @@ const totalHours = computed(() => {
   return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`
 })
 
-const averagePerRecord = computed(() => {
-  if (times.value.length === 0) return '0h'
-  const totalMinutes = times.value.reduce((sum, time) => sum + time.totalMinutes, 0)
-  const avgMinutes = Math.round(totalMinutes / times.value.length)
-  const hours = Math.floor(avgMinutes / 60)
-  const minutes = avgMinutes % 60
-  return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`
-})
 
 // Load data
 async function loadTimes() {
