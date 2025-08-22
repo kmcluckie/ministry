@@ -14,6 +14,10 @@
       </div>
       
       <UForm :schema="schema" :state="state" class="mt-8 space-y-4 flex flex-col" @submit="onSubmit">
+        <UFormGroup label="Name" name="name">
+          <UInput v-model="state.name" type="text" placeholder="Enter your name" class="w-full" />
+        </UFormGroup>
+
         <UFormGroup label="Email" name="email">
           <UInput v-model="state.email" type="email" placeholder="Enter your email" class="w-full" />
         </UFormGroup>
@@ -35,28 +39,21 @@
 </template>
 
 <script setup lang="ts">
-import { z } from 'zod'
 import type { FormSubmitEvent } from '#ui/types'
+import { registerSchema } from '../../shared/validation/authSchemas'
 
 definePageMeta({
   layout: false
 })
 
-const { client } = useSupabase()
 const router = useRouter()
 
-const schema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-  confirmPassword: z.string()
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"]
-})
+const schema = registerSchema
 
-type Schema = z.output<typeof schema>
+type Schema = typeof registerSchema._output
 
 const state = reactive({
+  name: '',
   email: '',
   password: '',
   confirmPassword: ''
@@ -68,12 +65,10 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
   loading.value = true
   
   try {
-    const { error } = await client.auth.signUp({
-      email: event.data.email,
-      password: event.data.password
+    await $fetch('/api/auth/register', {
+      method: 'POST',
+      body: event.data
     })
-    
-    if (error) throw error
     
     const toast = useToast()
     toast.add({
@@ -87,7 +82,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     const toast = useToast()
     toast.add({
       title: 'Error',
-      description: error.message || 'Failed to create account',
+      description: error.data?.message || error.message || 'Failed to create account',
       color: 'error'
     })
   } finally {
