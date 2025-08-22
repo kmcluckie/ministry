@@ -51,26 +51,25 @@
             <div class="flex items-start justify-between">
               <div class="flex-1">
                 <div class="flex items-center gap-3">
-                  <div class="text-lg font-semibold text-[var(--ui-text)]">
+                  <div class="font-semibold text-[var(--ui-text)]">
                     {{ formatMonth(report.month) }} {{ report.year }}
                   </div>
-                  <div class="text-sm text-[var(--ui-text-muted)]">
+                  <div class="text-[var(--ui-text-muted)]">
                     {{ report.totalHours }} hours
                   </div>
                 </div>
                 
-                <div class="mt-2 grid grid-cols-2 gap-4 text-sm">
-                  <div>
+                <div class="mt-2 grid grid-cols-3 gap-4 text-sm">
+                  <div class="col-span-1">
                     <span class="text-[var(--ui-text-muted)]">Studies:</span>
                     <span class="ml-1 text-[var(--ui-text)]">{{ report.studies }}</span>
                   </div>
-                  <div>
-                    <span class="text-[var(--ui-text-muted)]">Ministry:</span>
-                    <span class="ml-1 text-[var(--ui-text)]">{{ report.ministryHours }}h</span>
-                  </div>
-                  <div>
-                    <span class="text-[var(--ui-text-muted)]">Credit:</span>
-                    <span class="ml-1 text-[var(--ui-text)]">{{ report.creditHours }}h</span>
+                  <div class="col-span-2">
+                    <span class="text-[var(--ui-text-muted)]">Hours:</span>
+                    <span class="ml-1 text-[var(--ui-text)]">
+                      {{ report.ministryHours }}h
+                      <span v-if="report.creditHours"> + {{ report.creditHours }}h credits</span>
+                    </span>
                   </div>
                 </div>
 
@@ -120,10 +119,6 @@
 import type { ReportFormData } from '../../../shared/validation/reportSchemas'
 import type { Report } from '../../../types/ministry.types'
 
-type ServiceYearGroup = {
-  serviceYear: number
-  reports: Report[]
-}
 
 // Modal state management
 const {

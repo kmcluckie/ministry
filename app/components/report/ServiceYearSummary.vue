@@ -1,17 +1,17 @@
 <template>
-  <div class="rounded-lg border border-[var(--ui-border)] p-6 bg-[var(--ui-bg-elevated)]">
+  <div class="rounded-lg border border-[var(--ui-border)] p-4 bg-[var(--ui-bg-elevated)]">
     <div class="text-center text-lg font-semibold text-[var(--ui-text)] mb-4">
       {{ serviceYear }} Service Year Summary
     </div>
     
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="grid grid-cols-2 gap-4">
       <div class="text-center">
-        <div class="text-2xl font-bold text-[var(--ui-text)]">{{ totalHours }}</div>
+        <div class="text-xl font-bold text-[var(--ui-text)]">{{ totalHours }}</div>
         <div class="text-sm text-[var(--ui-text-muted)]">Total Hours</div>
       </div>
       
       <div class="text-center">
-        <div class="text-2xl font-bold text-[var(--ui-text)]">{{ averageHoursRemaining }}</div>
+        <div class="text-xl font-bold text-[var(--ui-text)]">{{ averageHoursRemaining }}</div>
         <div class="text-sm text-[var(--ui-text-muted)]">Avg/Month Needed</div>
       </div>
     </div>
