@@ -23,6 +23,13 @@
             >
               Time
             </NuxtLink>
+            <NuxtLink 
+              to="/reports" 
+              class="text-[var(--ui-text-muted)] hover:text-[var(--ui-primary)] px-2 sm:px-3 py-2 rounded-md text-sm font-medium"
+              active-class="text-[var(--ui-primary)] bg-[var(--ui-primary)]/10"
+            >
+              Reports
+            </NuxtLink>
             </div>
           </div>
         </div>

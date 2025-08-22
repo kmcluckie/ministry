@@ -39,6 +39,35 @@ export type TimeResponse = {
   updatedAt: string
 }
 
+export type ReportResponse = {
+  id: string
+  month: number
+  year: number
+  studies: number
+  ministryHours: number
+  creditHours: number
+  totalHours: number
+  periodKey: string
+  createdAt: string
+  updatedAt: string
+}
+
+export type ServiceYearSummaryResponse = {
+  totalStudies: number
+  totalMinistryHours: number
+  totalCreditHours: number
+  totalHours: number
+  monthsReported: number
+  averageStudiesPerMonth: number
+  averageHoursPerMonth: number
+  reports: ReportResponse[]
+}
+
+export type ReportDefaultsResponse = {
+  ministryHours: number
+  creditHours: number
+}
+
 /**
  * Domain object interfaces for better type safety
  * These allow for flexible date types (Date objects or strings)
@@ -70,6 +99,19 @@ export interface TimeDomain {
   createdAt: Date | string
   updatedAt: Date | string
   getTotalMinutes(): number
+}
+
+export interface ReportDomain {
+  id: string
+  month: number
+  year: number
+  studies: number
+  ministryHours: number
+  creditHours: number
+  createdAt: Date | string
+  updatedAt: Date | string
+  getTotalHours(): number
+  getReportPeriodKey(): string
 }
 
 /**
@@ -161,6 +203,49 @@ export function formatTimeResponse(time: TimeDomain): TimeResponse {
 }
 
 /**
+ * Formats a report domain object to API response DTO
+ */
+export function formatReportResponse(report: ReportDomain): ReportResponse {
+  return {
+    id: report.id,
+    month: report.month,
+    year: report.year,
+    studies: report.studies,
+    ministryHours: report.ministryHours,
+    creditHours: report.creditHours,
+    totalHours: report.getTotalHours(),
+    periodKey: report.getReportPeriodKey(),
+    createdAt: report.createdAt instanceof Date ? report.createdAt.toISOString() : report.createdAt,
+    updatedAt: report.updatedAt instanceof Date ? report.updatedAt.toISOString() : report.updatedAt,
+  }
+}
+
+/**
+ * Formats service year summary with reports array
+ */
+export function formatServiceYearSummaryResponse(summary: {
+  totalStudies: number
+  totalMinistryHours: number
+  totalCreditHours: number
+  totalHours: number
+  monthsReported: number
+  averageStudiesPerMonth: number
+  averageHoursPerMonth: number
+  reports: ReportDomain[]
+}): ServiceYearSummaryResponse {
+  return {
+    totalStudies: summary.totalStudies,
+    totalMinistryHours: summary.totalMinistryHours,
+    totalCreditHours: summary.totalCreditHours,
+    totalHours: summary.totalHours,
+    monthsReported: summary.monthsReported,
+    averageStudiesPerMonth: summary.averageStudiesPerMonth,
+    averageHoursPerMonth: summary.averageHoursPerMonth,
+    reports: summary.reports.map(formatReportResponse)
+  }
+}
+
+/**
  * Type guards for better type safety
  */
 export const typeGuards = {
@@ -174,4 +259,8 @@ export const typeGuards = {
   hasGetTotalMinutes: (time: unknown): time is TimeDomain =>
     time !== null && typeof time === 'object' && 'getTotalMinutes' in time && 
     typeof (time as TimeDomain).getTotalMinutes === 'function',
+    
+  hasGetTotalHours: (report: unknown): report is ReportDomain =>
+    report !== null && typeof report === 'object' && 'getTotalHours' in report && 
+    typeof (report as ReportDomain).getTotalHours === 'function',
 }

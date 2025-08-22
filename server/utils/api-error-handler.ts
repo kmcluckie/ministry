@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import type { H3Event } from 'h3'
 import { PersonNotFoundError, VisitNotFoundError } from '../bounded-contexts/persons/domain/errors/PersonErrors'
+import { ReportNotFoundError, UnauthorizedReportAccessError, DuplicateReportError, InvalidReportPeriodError } from '../bounded-contexts/reports/domain/errors/ReportErrors'
 import { 
   ValidationError, 
   UnauthorizedError, 
@@ -16,9 +17,13 @@ const ERROR_STATUS_MAP = {
   [ValidationError.name]: 400,
   [PersonNotFoundError.name]: 404,
   [VisitNotFoundError.name]: 404,
+  [ReportNotFoundError.name]: 404,
   [NotFoundError.name]: 404,
   [UnauthorizedError.name]: 401,
+  [UnauthorizedReportAccessError.name]: 401,
   [BusinessRuleViolationError.name]: 409,
+  [DuplicateReportError.name]: 409,
+  [InvalidReportPeriodError.name]: 400,
 } as const
 
 /**
@@ -160,4 +165,10 @@ export const validators = {
    */
   visitId: (event: H3Event): string => 
     validateRouteParam(event, 'id', 'Visit ID'),
+    
+  /**
+   * Validates and returns a report ID from route parameters
+   */
+  reportId: (event: H3Event): string => 
+    validateRouteParam(event, 'id', 'Report ID'),
 }
