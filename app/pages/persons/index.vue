@@ -4,7 +4,7 @@
       <UInput
         v-model="searchQuery"
         icon="i-heroicons-magnifying-glass"
-        placeholder="Search persons..."
+        placeholder="Search people..."
         class="flex-1"
         @input="handleSearchInput"
       />
@@ -21,13 +21,13 @@
     </div>
 
     <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4">
-      <p class="text-red-600">Error loading persons: {{ error.message }}</p>
+      <p class="text-red-600">Error loading people: {{ error.message }}</p>
     </div>
 
     <div v-else-if="!persons || persons.length === 0" class="rounded-lg border border-[var(--ui-border)] p-8 text-center">
       <UIcon name="i-heroicons-user-group" class="h-12 w-12 text-[var(--ui-text-muted)] mx-auto mb-3" />
       <p class="text-[var(--ui-text-muted)]">
-        {{ searchQuery ? 'No persons found matching your search' : 'No persons added yet' }}
+        {{ searchQuery ? 'No people found matching your search' : 'No people added yet' }}
       </p>
       <p class="text-sm text-[var(--ui-text-muted)] mt-2">
         {{ searchQuery ? 'Try a different search term' : 'Click "Add Person" to get started' }}

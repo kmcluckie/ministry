@@ -9,14 +9,14 @@
         <template #header>
           <div class="flex items-center gap-2">
             <UIcon name="i-lucide-users" class="w-5 h-5 text-primary" />
-            <h2 class="text-lg font-semibold">Persons</h2>
+            <h2 class="text-lg font-semibold">People</h2>
           </div>
         </template>
         <p class="text-gray-600 mb-4">
           Manage and track visits to congregation members
         </p>
         <UButton to="/persons" color="primary" block>
-          Go to Persons
+          Go to People
         </UButton>
       </UCard>
       

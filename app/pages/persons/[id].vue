@@ -22,7 +22,7 @@
     <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4">
       <p class="text-red-600">Error loading person: {{ error.message }}</p>
       <UButton class="mt-3" color="neutral" variant="ghost" @click="navigateTo('/persons')">
-        Back to Persons
+        Back to People
       </UButton>
     </div>
 
@@ -31,7 +31,7 @@
       <UIcon name="i-heroicons-user-circle" class="h-12 w-12 text-[var(--ui-text-muted)] mx-auto mb-3" />
       <p class="text-[var(--ui-text-muted)]">Person not found</p>
       <UButton class="mt-3" color="neutral" variant="ghost" @click="navigateTo('/persons')">
-        Back to Persons
+        Back to People
       </UButton>
     </div>
 
