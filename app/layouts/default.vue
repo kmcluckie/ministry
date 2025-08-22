@@ -1,7 +1,7 @@
 <template>
   <div v-if="user" class="min-h-screen bg-[var(--ui-bg)]">
     <!-- Navigation Header -->
-    <nav class="border-b border-[var(--ui-border)] px-4 py-3">
+    <nav class="sticky top-0 z-50 bg-[var(--ui-bg)] border-b border-[var(--ui-border)] px-4 py-3">
       <div class="max-w-2xl mx-auto flex justify-between items-center">
         <div class="flex items-center space-x-2 sm:space-x-8">          
           <div class="flex items-center space-x-2 sm:space-x-4">

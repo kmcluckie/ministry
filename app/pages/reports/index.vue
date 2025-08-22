@@ -24,7 +24,7 @@
       <p class="text-sm text-[var(--ui-text-muted)] mt-2">Click "Add Report" to get started</p>
     </div>
 
-    <div v-else class="space-y-6">
+    <div v-else class="space-y-4">
       <!-- Current Service Year Summary -->
       <ReportServiceYearSummary
         v-if="currentServiceYearReports.length > 0"
