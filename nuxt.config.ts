@@ -4,6 +4,14 @@ export default defineNuxtConfig({
 
   modules: ['@nuxt/ui', '@nuxt/eslint', '@nuxt/test-utils', '@nuxtjs/supabase'],
 
+  supabase: {
+    redirectOptions: {
+      login: '/login',
+      callback: '/confirm',
+      exclude: ['/register']
+    }
+  },
+
   css: ['~/assets/css/main.css'],
 
   ssr: false,
