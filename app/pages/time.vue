@@ -1,37 +1,14 @@
 <template>
-  <div class="max-w-7xl mx-auto p-4">
-    <div class="mb-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-      <div class="flex-1 flex flex-wrap gap-3">
-        <USelect
-          v-model="selectedTypes"
-          :items="typeOptions"
-          multiple
-          placeholder="Type"
-          class="w-40"
-          @change="applyFilters"
-        />
-        <USelect
-          v-model="selectedMonth"
-          :items="monthOptions"
-          placeholder="Month"
-          class="w-44"
-          @change="applyFilters"
-        />
-        <USelect
-          v-model="selectedServiceYear"
-          :items="serviceYearOptions"
-          placeholder="Service Year"
-          class="w-48"
-          @change="applyFilters"
-        />
-        <UButton
-          color="neutral"
-          variant="ghost"
-          @click="clearFilters"
-        >
-          Clear Filters
-        </UButton>
-      </div>
+  <div class="p-4">
+    <div class="mb-4 flex flex-row gap-3 items-start items-center justify-between">
+      <USelect
+        v-model="selectedTypes"
+        :items="typeOptions"
+        multiple
+        placeholder="Type"
+        class="grow sm:w-40"
+        @change="applyFilters"
+      />
       <UButton 
         icon="i-heroicons-plus" 
         @click="openAddTimeModal"
@@ -43,12 +20,12 @@
     <!-- Summary -->
     <div v-if="times && times.length > 0" class="mb-6 grid grid-cols-2 gap-4">
       <div class="rounded-lg border border-[var(--ui-border)] p-4">
-        <div class="text-2xl font-bold text-[var(--ui-text)]">{{ totalRecords }}</div>
-        <div class="text-sm text-[var(--ui-text-muted)]">Records</div>
+        <div class="text-2xl font-bold text-[var(--ui-text)]">{{ lastMonthHours }}</div>
+        <div class="text-sm text-[var(--ui-text-muted)]">Last Month</div>
       </div>
       <div class="rounded-lg border border-[var(--ui-border)] p-4">
-        <div class="text-2xl font-bold text-[var(--ui-text)]">{{ totalHours }}</div>
-        <div class="text-sm text-[var(--ui-text-muted)]">Total Hours</div>
+        <div class="text-2xl font-bold text-[var(--ui-text)]">{{ thisMonthHours }}</div>
+        <div class="text-sm text-[var(--ui-text-muted)]">This Month</div>
       </div>
     </div>
     
@@ -150,8 +127,6 @@ const isEditing = ref(false)
 
 // Filter states
 const selectedTypes = ref<string[]>([])
-const selectedMonth = ref<string>('all')
-const selectedServiceYear = ref<string>('all')
 
 // Data
 const times = ref<TimeRecord[]>([])
@@ -173,59 +148,39 @@ const typeOptions = computed(() => {
   }))
 })
 
-const monthOptions = computed(() => {
-  const months = [
-    { label: 'All months', value: 'all' }
-  ]
-  const currentDate = new Date()
-  
-  // Generate last 12 months
-  for (let i = 0; i < 12; i++) {
-    const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1)
-    const year = date.getFullYear()
-    const month = date.getMonth() + 1
-    const label = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-    months.push({
-      label,
-      value: `${year}-${month.toString().padStart(2, '0')}`
-    })
-  }
-  
-  return months
-})
-
-const serviceYearOptions = computed(() => {
-  const currentYear = new Date().getFullYear()
-  const currentMonth = new Date().getMonth() + 1
-  const years = [
-    { label: 'All service years', value: 'all' }
-  ]
-  
-  // Service year starts in September, so if we're before September, current service year is previous year
-  const baseYear = currentMonth >= 9 ? currentYear : currentYear - 1
-  
-  // Generate last 5 service years
-  for (let i = 0; i < 5; i++) {
-    const year = baseYear - i
-    years.push({
-      label: `${year}-${year + 1} Service Year`,
-      value: (year + 1).toString() // Service year ends in the following calendar year
-    })
-  }
-  
-  return years
-})
 
 // Filter status
 const hasActiveFilters = computed(() => {
-  return selectedTypes.value.length > 0 || selectedMonth.value !== 'all' || selectedServiceYear.value !== 'all'
+  return selectedTypes.value.length > 0
 })
 
 // Summary calculations
-const totalRecords = computed(() => times.value.length)
+const lastMonthHours = computed(() => {
+  const now = new Date()
+  const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+  const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0)
+  
+  const filteredTimes = times.value.filter(time => {
+    const recordDate = new Date(time.recordedOn + 'T00:00:00.000Z')
+    return recordDate >= lastMonth && recordDate <= lastMonthEnd
+  })
+  
+  const totalMinutes = filteredTimes.reduce((sum, time) => sum + time.totalMinutes, 0)
+  const hours = Math.floor(totalMinutes / 60)
+  const minutes = totalMinutes % 60
+  return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`
+})
 
-const totalHours = computed(() => {
-  const totalMinutes = times.value.reduce((sum, time) => sum + time.totalMinutes, 0)
+const thisMonthHours = computed(() => {
+  const now = new Date()
+  const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+  
+  const filteredTimes = times.value.filter(time => {
+    const recordDate = new Date(time.recordedOn + 'T00:00:00.000Z')
+    return recordDate >= thisMonthStart && recordDate <= now
+  })
+  
+  const totalMinutes = filteredTimes.reduce((sum, time) => sum + time.totalMinutes, 0)
   const hours = Math.floor(totalMinutes / 60)
   const minutes = totalMinutes % 60
   return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`
@@ -242,18 +197,6 @@ async function loadTimes() {
     
     if (selectedTypes.value.length > 0) {
       selectedTypes.value.forEach(type => params.append('type', type))
-    }
-    
-    if (selectedMonth.value && selectedMonth.value !== 'all') {
-      const [year, month] = selectedMonth.value.split('-')
-      if (year && month) {
-        params.set('year', year)
-        params.set('month', month)
-      }
-    }
-    
-    if (selectedServiceYear.value && selectedServiceYear.value !== 'all') {
-      params.set('serviceYear', selectedServiceYear.value)
     }
     
     const url = `/api/times${params.toString() ? '?' + params.toString() : ''}`
@@ -280,12 +223,6 @@ function applyFilters() {
   loadTimes()
 }
 
-function clearFilters() {
-  selectedTypes.value = []
-  selectedMonth.value = 'all'
-  selectedServiceYear.value = 'all'
-  loadTimes()
-}
 
 // Formatters
 const formatDate = (dateString: string) => {

@@ -12,7 +12,7 @@
       />
     </template>
 
-    <div class="max-w-4xl mx-auto py-6 px-4">
+    <div class="p-4">
     <!-- Loading State -->
     <div v-if="pending" class="flex justify-center py-8">
       <UIcon name="i-heroicons-arrow-path" class="animate-spin h-6 w-6 text-[var(--ui-text-muted)]" />

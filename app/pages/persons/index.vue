@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-7xl mx-auto p-4">
+  <div class="p-4">
     <div class="mb-4 flex gap-3 items-center">
       <UInput
         v-model="searchQuery"
