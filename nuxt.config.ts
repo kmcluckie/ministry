@@ -12,6 +12,19 @@ export default defineNuxtConfig({
     }
   },
 
+  pwa: {
+    registerType: 'autoUpdate',
+    workbox: {
+      navigateFallback: '/'
+    },
+    manifest: {
+      name: 'Ministry App',
+      short_name: 'Ministry',
+      theme_color: '#ffffff',
+      background_color: '#ffffff'
+    }
+  },
+
   css: ['~/assets/css/main.css'],
 
   ssr: false,
