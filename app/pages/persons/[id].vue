@@ -19,8 +19,8 @@
     </div>
 
     <!-- Error State -->
-    <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4">
-      <p class="text-red-600">Error loading person: {{ error.message }}</p>
+    <div v-else-if="error" class="bg-[var(--ui-color-error-50)] border border-[var(--ui-color-error-200)] rounded-lg p-4">
+      <p class="text-error">Error loading person: {{ error.message }}</p>
       <UButton class="mt-3" color="neutral" variant="ghost" @click="navigateTo('/persons')">
         Back to People
       </UButton>

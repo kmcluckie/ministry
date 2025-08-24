@@ -14,8 +14,8 @@
       <UIcon name="i-heroicons-arrow-path" class="animate-spin h-6 w-6 text-[var(--ui-text-muted)]" />
     </div>
 
-    <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4">
-      <p class="text-red-600">Error loading reports: {{ error.message }}</p>
+    <div v-else-if="error" class="bg-[var(--ui-color-error-50)] border border-[var(--ui-color-error-200)] rounded-lg p-4">
+      <p class="text-error">Error loading reports: {{ error.message }}</p>
     </div>
 
     <div v-else-if="!reports || reports.length === 0" class="rounded-lg border border-[var(--ui-border)] p-8 text-center">

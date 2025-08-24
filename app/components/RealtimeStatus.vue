@@ -103,20 +103,20 @@ const iconClasses = computed(() => {
 
 const statusClasses = computed(() => {
   if (props.state.error || props.state.connectionStatus === 'ERROR') {
-    return 'bg-red-50 border-red-200 text-red-800'
+    return 'bg-[var(--ui-color-error-50)] border-[var(--ui-color-error-200)] text-red-800'
   }
   
   switch (props.state.connectionStatus) {
     case 'CONNECTING':
-      return 'bg-yellow-50 border-yellow-200 text-yellow-800'
+      return 'bg-[var(--color-chetwode-blue-50)] border-[var(--color-chetwode-blue-200)] text-[var(--color-chetwode-blue-800)]'
     case 'OPEN':
       return props.state.isSubscribed 
-        ? 'bg-green-50 border-green-200 text-green-800'
-        : 'bg-yellow-50 border-yellow-200 text-yellow-800'
+        ? 'bg-[var(--color-wasabi-50)] border-[var(--color-wasabi-200)] text-[var(--color-wasabi-800)]'
+        : 'bg-[var(--color-chetwode-blue-50)] border-[var(--color-chetwode-blue-200)] text-[var(--color-chetwode-blue-800)]'
     case 'CLOSED':
-      return 'bg-gray-50 border-gray-200 text-gray-800'
+      return 'bg-[var(--color-aztec-50)] border-[var(--color-aztec-200)] text-[var(--color-aztec-800)]'
     default:
-      return 'bg-gray-50 border-gray-200 text-gray-800'
+      return 'bg-[var(--color-aztec-50)] border-[var(--color-aztec-200)] text-[var(--color-aztec-800)]'
   }
 })
 </script>
