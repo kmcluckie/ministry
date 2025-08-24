@@ -21,7 +21,14 @@ export default defineNuxtConfig({
       name: 'Ministry App',
       short_name: 'Ministry',
       theme_color: '#4c646e',
-      background_color: '#FCFAF5'
+      background_color: '#FCFAF5',
+      icons: [
+        {
+          src: '/icon.png',
+          sizes: '512x512',
+          type: 'image/png'
+        }
+      ]
     }
   },
 
