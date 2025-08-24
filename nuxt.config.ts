@@ -33,5 +33,9 @@ export default defineNuxtConfig({
     '~/shared': './shared'
   },
 
+  fonts: {
+    provider: 'google',
+  },
+
   compatibilityDate: '2025-07-16',
 })
