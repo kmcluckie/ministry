@@ -2,8 +2,13 @@ export default defineAppConfig({
   // https://ui.nuxt.com/getting-started/theme#design-system
   ui: {
     colors: {
-      primary: 'sky',
-      neutral: 'slate',
+      primary: 'bismark',
+      secondary: 'raffia',
+      success: 'wasabi',
+      info: 'raffia',
+      warning: 'chetwode-blue',
+      error: 'solid-pink',
+      neutral: 'aztec',
     },
     button: {
       defaultVariants: {
