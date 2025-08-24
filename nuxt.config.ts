@@ -20,8 +20,8 @@ export default defineNuxtConfig({
     manifest: {
       name: 'Ministry App',
       short_name: 'Ministry',
-      theme_color: '#ffffff',
-      background_color: '#ffffff'
+      theme_color: '#4c646e',
+      background_color: '#FCFAF5'
     }
   },
 
@@ -31,10 +31,6 @@ export default defineNuxtConfig({
 
   alias: {
     '~/shared': './shared'
-  },
-
-  fonts: {
-    provider: 'google',
   },
 
   compatibilityDate: '2025-07-16',

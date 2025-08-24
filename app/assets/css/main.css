@@ -1,14 +1,6 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
 
-/* :root {
-  --ui-bg: #FCFAF5;
-}
-
-.dark {
-  --ui-bg: var(--ui-color-aztec-950);
-} */
-
 @theme static {
   --font-sans: 'Archivo', sans-serif;
 
