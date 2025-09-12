@@ -66,7 +66,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     
     if (error) throw error
     
-    await router.push('/persons')
+    await router.push('/time')
   } catch (error: unknown) {
     const toast = useToast()
     toast.add({
